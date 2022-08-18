@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>aloe_vera_plant/aloevera.mtl</file>
+        <file>aloe_vera_plant/aloevera.obj</file>
+        <file>aloe_vera_plant/aloe_pot_basecolor.png</file>
+        <file>aloe_vera_plant/aloe_pot_normal.png</file>
+        <file>aloe_vera_plant/aloevera_diffure.png</file>
+    </qresource>
+</RCC>

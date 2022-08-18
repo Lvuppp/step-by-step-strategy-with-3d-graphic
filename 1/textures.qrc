@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>ice1_n.jpg</file>
+        <file>skybox0.png</file>
+        <file>cl_ppl.jpg</file>
+        <file>_floor.jpg</file>
+        <file>pantone-very-peri-2022.jpg</file>
+    </qresource>
+</RCC>

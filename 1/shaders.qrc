@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>vselect.vsh</file>
+        <file>fselect.fsh</file>
+        <file>vskybox.vsh</file>
+        <file>fskybox.fsh</file>
+        <file>fcharacter.fsh</file>
+        <file>vcharacter.vsh</file>
+    </qresource>
+</RCC>
