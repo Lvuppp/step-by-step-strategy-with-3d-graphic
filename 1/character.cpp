@@ -2,11 +2,11 @@
 
 #include <QDir>
 
-Character::Character() : CharacterType(type0), isSelect(false)
+Character::Character() : CharacterType(type0)
 {
 }
 
-Character::Character(const Type &type) : CharacterType(type), isSelect(false)
+Character::Character(const Type &type,const int& position) :  positionOnBlock(position), CharacterType(type)
 {
     if (type == type0)
         ObjPath = ":/aloe_vera_plant/aloevera.obj";
@@ -29,18 +29,6 @@ QVector<qsizetype> Character::AvailableSteps(const qsizetype &CurFloorPos, const
 
     return QVector<qsizetype>();
 }
-
-void Character::ChangeSelectionStatus()
-{
-    isSelect = !isSelect;
-}
-
-
-const bool &Character::IsSelect() const
-{
-    return isSelect;
-}
-
 
 void Character::loadObjectFromFile(const QString &path)
 {
@@ -184,6 +172,16 @@ void Character::calculateTBN(QVector<VertexData> &data)
 const QVector3D &Character::GetLocation() const
 {
     return objects.last()->GetLocation();
+}
+
+const int &Character::getBlockPosition() const
+{
+    return positionOnBlock;
+}
+
+void Character::SetBlockPosition(const int& blockNumber)
+{
+    positionOnBlock = blockNumber;
 }
 
 void Character::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)

@@ -18,7 +18,7 @@ Widget::Widget(QWidget *parent)
 
     */
 
-    square = 8;
+    square = 3;
 }
 
 Widget::~Widget()
@@ -56,7 +56,7 @@ void Widget::initializeGL()
 
         строки
 
-        initFloor...,
+        initBlock...,
 
         floor.last()->...,
 
@@ -76,9 +76,9 @@ void Widget::initializeGL()
 
         if (X == 0 || X == 1 || X == square * square - 1 || X == square * square - 2) //крайние квадратики
                                                                     //так можно (как вариант) пометить место старта игроков
-            initFloor(3.0f, 3.0f, 3.0f, &PlTexture);
+            initBlock(3.0f, 3.0f, 3.0f, &PlTexture);
         else
-            initFloor(3.0f, 3.0f, 3.0f, &FloorTexture, &FloorNormalMap);
+            initBlock(3.0f, 3.0f, 3.0f, &FloorTexture, &FloorNormalMap);
 
         floor.last()->Translate(QVector3D(x, y, z));
 
@@ -96,7 +96,7 @@ void Widget::initializeGL()
 
     groups.append(new Group);
 
-    characters.append(new Character(Character::type0));
+    characters.append(new Character(Character::type0, square * square - 1));
     characters.last()->loadObjectFromFile(characters.last()->GetObj());
 
 
@@ -112,7 +112,6 @@ void Widget::initializeGL()
 
     selectObjects.append(groups.last());
 
-    character_floor.insert(0, square * square - 1);
     skybox = new SkyBox(100.0f, QImage(":/skybox0.png"));
 
 }
@@ -161,35 +160,60 @@ void Widget::mousePressEvent(QMouseEvent *event)
     else if (event->button() == Qt::RightButton) {
 
 
-        int indexOfSelectedObject = SelectObject(event->position().x(), event->position().y(), selectObjects);
+        int indexOfSelectedCharacter = SelectObject(event->position().x(), event->position().y(), selectObjects);
+        int indexOfSelectedBlock = SelectObject(event->position().x(), event->position().y(), selectedBlocks);
 
-        if (!indexOfSelectedObject--){
+        qDebug() << indexOfSelectedCharacter;
+        qDebug() << indexOfSelectedBlock;
 
-            int indexOfSelectedBlock = SelectObject(event->position().x(), event->position().y(), selectedBlocks);
-
-            if(!iondex){
-
-            }
-
+        if (indexOfSelectedCharacter == 0 && selectedCharacter == nullptr){
             return;
         }
 
-        qsizetype charactersBlock = character_floor[indexOfSelectedObject];
-        QVector<qsizetype> avalibaleBlocks  = characters[indexOfSelectedObject]->AvailableSteps(charactersBlock, square);
+        if(indexOfSelectedCharacter != 0){
 
-        if(characters[indexOfSelectedObject]->IsSelect()){
+            indexOfSelectedCharacter--;
+            qsizetype charactersBlock = characters[indexOfSelectedCharacter]->getBlockPosition();
+            QVector<qsizetype> avalibaleBlocks  = characters[indexOfSelectedCharacter]->AvailableSteps(charactersBlock, square);
 
-            ChangeBlockTexture(avalibaleBlocks);
-            characters[indexOfSelectedObject]->ChangeSelectionStatus();
+            if(selectedCharacter == nullptr){
+                selectedCharacter = characters[indexOfSelectedCharacter];
+                ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
 
-            return ;
+            }
+            else if(selectedCharacter == characters[indexOfSelectedCharacter]){
+                ChangeBlockTexture(avalibaleBlocks);
+                selectedCharacter = nullptr;
+
+            }
+            else{
+                QVector<qsizetype> oldSelectedCharacterAvalibaleBlocks =
+                        selectedCharacter->AvailableSteps(selectedCharacter->getBlockPosition(),square);
+
+                ChangeBlockTexture(oldSelectedCharacterAvalibaleBlocks);
+
+                selectedCharacter = characters[indexOfSelectedCharacter];
+                ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
+
+            }
+        }
+        else if(indexOfSelectedBlock != 0 && floor[--indexOfSelectedBlock]->IsAvailable()){
+
+            selectedCharacter->Translate(floor[indexOfSelectedBlock]->GetLocation() -
+                                         floor[selectedCharacter->getBlockPosition()]->GetLocation());
+
+            QVector<qsizetype> oldSelectedCharacterAvalibaleBlocks =
+                    selectedCharacter->AvailableSteps(selectedCharacter->getBlockPosition(),square);
+
+            ChangeBlockTexture(oldSelectedCharacterAvalibaleBlocks);
+
+            selectedCharacter->SetBlockPosition(indexOfSelectedBlock + 1);
+            selectedCharacter = nullptr;
+
+            update();
         }
 
-        characters[indexOfSelectedObject]->ChangeSelectionStatus();
-        ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
-
     }
-
     event->accept();
 }
 
@@ -278,7 +302,7 @@ void Widget::initShaders()
        exit(-2018);
 }
 
-void Widget::initFloor(float width, float height, float depth, QImage *diffuseMap, QImage *normalMap)
+void Widget::initBlock(float width, float height, float depth, QImage *diffuseMap, QImage *normalMap)
 {
     float w_by2 = width / 2.0f;
 
@@ -367,16 +391,17 @@ void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
         if(blockIndex >= square * square || blockIndex <= 0)
             continue;
 
+
         QVector3D blockPosition = floor[blockIndex]->GetLocation();
-        qDebug() << blockPosition.x();
         groups.first()->delObject(blockIndex);
 
         if(texture == nullptr)
-            initFloor(3.0f, 3.0f, 3.0f, floor.at(blockIndex)->getMainTexture());
+            initBlock(3.0f, 3.0f, 3.0f, floor.at(blockIndex)->getMainTexture());
         else
-            initFloor(3.0f, 3.0f, 3.0f, texture);
+            initBlock(3.0f, 3.0f, 3.0f, texture);
 
         floor.last()->Translate(blockPosition);
+        floor[blockIndex]->ChangeAvailableStatus();
         groups.first()->insertObject(floor.last(),blockIndex);
     }
 

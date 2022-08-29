@@ -43,7 +43,7 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
     void initShaders();
-    void initFloor(float width, float height, float depth, QImage *diffuseMap = 0, QImage *normalMap = 0);
+    void initBlock(float width, float height, float depth, QImage *diffuseMap = 0, QImage *normalMap = 0);
 
     void ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
     int SelectObject(int x, int y, QVector<WorldEngineBase *> &objs);
@@ -96,5 +96,7 @@ private:
 
     */
 
+
+    Character *selectedCharacter = nullptr;
 };
 #endif // WIDGET_H

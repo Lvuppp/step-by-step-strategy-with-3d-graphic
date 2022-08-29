@@ -1,0 +1,14 @@
+debug/block.o
+debug/camera.o
+debug/character.o
+debug/group.o
+debug/main.o
+debug/material.o
+debug/materiallibrary.o
+debug/object3d.o
+debug/skybox.o
+debug/widget.o
+debug/qrc_models.o
+debug/qrc_shaders.o
+debug/qrc_textures.o
+debug/moc_widget.o

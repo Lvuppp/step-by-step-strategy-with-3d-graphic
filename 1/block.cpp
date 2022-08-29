@@ -26,6 +26,7 @@ const Block::BlockType &Block::GetType() const
 void Block::ChangeAvailableStatus()
 {
     isAvailable = !isAvailable;
+    qDebug() << isAvailable;
 }
 
 const bool &Block::IsAvailable() const

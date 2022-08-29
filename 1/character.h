@@ -31,16 +31,12 @@ public:
 
     Character();
 
-    Character(const Type &type);
+    Character(const Type &type, const int& position);
 
     const QString &GetObj() const;
-
     const Type &GetType() const;
 
     QVector<qsizetype> AvailableSteps(const qsizetype& CurFloorPos, const qsizetype &FloorSquare);
-
-    void ChangeSelectionStatus(); // изменения состояние выделения
-    const bool &IsSelect() const;
 
     virtual ~Character() {
 
@@ -56,32 +52,24 @@ public:
     void calculateTBN(QVector<VertexData> &data); //для карты нормалей
 
     const QVector3D& GetLocation() const;
-
+    const int& getBlockPosition() const;
+    void SetBlockPosition(const int& blockNumber);
 
 
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
-
     void Rotate(const QQuaternion &r);
-
     void Translate(const QVector3D &t);
-
     void Scale(const float &s);
-
     void SetGlobalTransform(const QMatrix4x4 &q);
 
 private:
 
     QVector<qsizetype> CalculateForType0(const qsizetype& i, const qsizetype &s);
-
     QVector<Object3D *> objects;
-
     MaterialLibrary materialLibrary;
-
-
-    Type CharacterType;
-
-    bool isSelect;
-
     QString ObjPath;
+
+    int positionOnBlock;
+    Type CharacterType;
 };
 #endif // CHARACTER_H
