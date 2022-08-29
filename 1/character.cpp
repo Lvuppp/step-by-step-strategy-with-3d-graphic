@@ -2,11 +2,11 @@
 
 #include <QDir>
 
-Character::Character() : CharacterType(type0), choosen(false)
+Character::Character() : CharacterType(type0), isSelect(false)
 {
 }
 
-Character::Character(const Type &type) : CharacterType(type), choosen(false)
+Character::Character(const Type &type) : CharacterType(type), isSelect(false)
 {
     if (type == type0)
         ObjPath = ":/aloe_vera_plant/aloevera.obj";
@@ -30,19 +30,15 @@ QVector<qsizetype> Character::AvailableSteps(const qsizetype &CurFloorPos, const
     return QVector<qsizetype>();
 }
 
-void Character::SetChoosen()
+void Character::ChangeSelectionStatus()
 {
-    choosen = true;
+    isSelect = !isSelect;
 }
 
-void Character::SetNotChoosen()
-{
-    choosen = false;
-}
 
-const bool &Character::IsChoosen() const
+const bool &Character::IsSelect() const
 {
-    return choosen;
+    return isSelect;
 }
 
 
@@ -238,7 +234,6 @@ QVector<qsizetype> Character::CalculateForType0(const qsizetype &i, const qsizet
 
     if (i == (s * s - 1)) {
 
-        steps.emplaceBack(i);
         steps.emplaceBack(i - 1);
         steps.emplaceBack(i - s);
         steps.emplaceBack(i - s - 1);

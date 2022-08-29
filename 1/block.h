@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
+#ifndef BLOCK_H
+#define BLOCK_H
 
 #include "materiallibrary.h"
 #include "object3d.h"
@@ -11,7 +11,7 @@
 #include <QFile>
 #include <QFileInfo>
 
-class Character : public WorldEngineBase
+class Block : public WorldEngineBase
 {
 public:
 
@@ -23,65 +23,60 @@ public:
 
         Разумеется, нужно переназвать
     */
-    enum Type {
+    enum BlockType {
 
-        type0 = 0,
-        type1 = 1
+        rock = 0,
+        gravel = 1,
+        sand = 2,
+        ground = 3,
+        grass = 4
     };
 
-    Character();
+    Block(const QImage &texture);
+    Block(const BlockType &type);
 
-    Character(const Type &type);
 
-    const QString &GetObj() const;
-
-    const Type &GetType() const;
-
-    QVector<qsizetype> AvailableSteps(const qsizetype& CurFloorPos, const qsizetype &FloorSquare);
-
-    void ChangeSelectionStatus(); // изменения состояние выделения
-    const bool &IsSelect() const;
-
-    virtual ~Character() {
+    virtual ~Block() {
 
         for(auto object: objects)
             delete object;
 
     }
 
+    const QString &GetObj() const;
+    const BlockType &GetType() const;
+
+
+    void ChangeAvailableStatus(); // изменения состояние выделения
+    const bool &IsAvailable() const;
+
+
     void loadObjectFromFile(const QString &path);
     void addObject(Object3D *object );
+
+
     Object3D *getObject(quint32 index);
+    const QVector3D& GetLocation() const;
+    void ChangeMainTexture();
+    QImage *getMainTexture();
+
 
     void calculateTBN(QVector<VertexData> &data); //для карты нормалей
-
-    const QVector3D& GetLocation() const;
-
-
-
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
-
     void Rotate(const QQuaternion &r);
-
     void Translate(const QVector3D &t);
-
     void Scale(const float &s);
-
     void SetGlobalTransform(const QMatrix4x4 &q);
 
 private:
 
-    QVector<qsizetype> CalculateForType0(const qsizetype& i, const qsizetype &s);
-
     QVector<Object3D *> objects;
-
     MaterialLibrary materialLibrary;
+    QImage mainTexture;
 
+    BlockType blockType;
+    bool isAvailable;
 
-    Type CharacterType;
-
-    bool isSelect;
-
-    QString ObjPath;
 };
-#endif // CHARACTER_H
+
+#endif // BLOCK_H

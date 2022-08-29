@@ -1,4 +1,4 @@
-#include "widget.h"
+  #include "widget.h"
 
 #include <QtMath>
 #include <QOpenGLFunctions>
@@ -42,7 +42,7 @@ void Widget::initializeGL()
     initShaders();
 
     QImage FloorTexture(":/pantone-very-peri-2022.jpg"),
-            FloorNormalMap(":/ice1_n.jpg"),
+            FloorNormalMap(":/ice_texture.jpg"),
 
             PlTexture(":/cl_ppl.jpg");
 
@@ -84,20 +84,19 @@ void Widget::initializeGL()
 
         groups.first()->addObject(floor.last());
 
-        x += 4.5f;
+        x += 5.5f;
     }
 
 
     WorldObjects.append(groups.first());
 
-    QVector3D floor_pos(-square - 3.0f, -3.5f, -square * 4.0f);
+    QVector3D floor_pos(-square, -3.5f, -square);
     groups.first()->Translate(QVector3D(floor_pos));
 
 
     groups.append(new Group);
 
     characters.append(new Character(Character::type0));
-
     characters.last()->loadObjectFromFile(characters.last()->GetObj());
 
 
@@ -107,7 +106,6 @@ void Widget::initializeGL()
 
     groups.last()->addObject(characters.last());
 
-
     WorldObjects.append(groups.last());
 
     characters.last()->Scale(15.0f);
@@ -115,8 +113,6 @@ void Widget::initializeGL()
     selectObjects.append(groups.last());
 
     character_floor.insert(0, square * square - 1);
-
-
     skybox = new SkyBox(100.0f, QImage(":/skybox0.png"));
 
 }
@@ -164,62 +160,34 @@ void Widget::mousePressEvent(QMouseEvent *event)
 
     else if (event->button() == Qt::RightButton) {
 
-        int index = SelectObject(event->position().x(), event->position().y(), selectObjects);
 
-        if (!index)
+        int indexOfSelectedObject = SelectObject(event->position().x(), event->position().y(), selectObjects);
+
+        if (!indexOfSelectedObject--){
+
+            int indexOfSelectedBlock = SelectObject(event->position().x(), event->position().y(), selectedBlocks);
+
+            if(!iondex){
+
+            }
+
             return;
-
-        --index;
-
-        qsizetype FloorIndex = character_floor[index];
-
-        static QImage FloorTexture(":/_floor.jpg");
-
-        QVector<qsizetype> area = characters[index]->AvailableSteps(FloorIndex, square);
-
-        static auto clicked = 1;
-
-        for (qsizetype j = 0; j < area.size(); ++j) {
-
-            qsizetype i = area[j];
-
-            QVector3D pos = floor[i]->GetLocation();
-
-            groups.first()->delObject(i);
-
-            initFloor(3.0f, 3.0f, 3.0f, &FloorTexture);
-
-            floor.last()->Translate(pos);
-
-            groups.first()->addObject(floor.last());
-
-
-            /*
-
-                Нужно добавить в цикл что-то вроде
-
-                static auto clicked = 1
-
-                if (clicked % 2)
-                    загрузить текстуру выбора хода
-                else
-                    загрузить обычную текстуру, но учесть, что на занятую до этого площадь нужно загрузить другую текстуру
-
-                ++clicked
-
-                также, после этого нужно будет изменить selectObjects: теперь мы выбираем среди кубиков, а не персонажей
-                затем нужно передать какой-то флаг в эту функцию, чтобы заняться конкретно перестановкой выбранного
-                персонажа на выбранный кубик
-
-                и не забыть про то, что на объект можно нажать, но при этом не переставлять его куда-либо
-
-            */
-
         }
 
-        ++clicked;
+        qsizetype charactersBlock = character_floor[indexOfSelectedObject];
+        QVector<qsizetype> avalibaleBlocks  = characters[indexOfSelectedObject]->AvailableSteps(charactersBlock, square);
 
-        update();
+        if(characters[indexOfSelectedObject]->IsSelect()){
+
+            ChangeBlockTexture(avalibaleBlocks);
+            characters[indexOfSelectedObject]->ChangeSelectionStatus();
+
+            return ;
+        }
+
+        characters[indexOfSelectedObject]->ChangeSelectionStatus();
+        ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
+
     }
 
     event->accept();
@@ -271,6 +239,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Down:
         camera->Translate(QVector3D(0.0f, 0.0f, -0.5f));
     }
+
 
     update();
 }
@@ -369,24 +338,49 @@ void Widget::initFloor(float width, float height, float depth, QImage *diffuseMa
     else
         mtl->setDiffuseMap(":/pantone-very-peri-2022.jpg");
 
+
     if (normalMap)
         mtl->setNormalMap(*normalMap);
     else
-        mtl->setNormalMap(":/ice1_n.jpg");
+        mtl->setNormalMap(":/ice_texture.jpg");
 
     mtl->setShinnes(96.0);
     mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
     mtl->setSpecularColor(QVector3D(1.0, 1.0, 1.0));
     mtl->setAmbienceColor(QVector3D(1.0, 1.0, 1.0));
 
-
-    Character *newObj = new Character;
+    Block *newObj = new Block(mtl->getDiffuseMap());
 
     newObj->calculateTBN(vertexes);
-
     newObj->addObject(new Object3D(vertexes, indexes, mtl));
 
     floor.append(newObj);
+    selectedBlocks.append(floor.last());
+}
+
+void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
+{
+    for (qsizetype j = 0; j < blocks.size(); ++j) {
+
+        qsizetype blockIndex = blocks[j];
+
+        if(blockIndex >= square * square || blockIndex <= 0)
+            continue;
+
+        QVector3D blockPosition = floor[blockIndex]->GetLocation();
+        qDebug() << blockPosition.x();
+        groups.first()->delObject(blockIndex);
+
+        if(texture == nullptr)
+            initFloor(3.0f, 3.0f, 3.0f, floor.at(blockIndex)->getMainTexture());
+        else
+            initFloor(3.0f, 3.0f, 3.0f, texture);
+
+        floor.last()->Translate(blockPosition);
+        groups.first()->insertObject(floor.last(),blockIndex);
+    }
+
+    update();
 }
 
 int Widget::SelectObject(int x, int y, QVector<WorldEngineBase *> &objs)

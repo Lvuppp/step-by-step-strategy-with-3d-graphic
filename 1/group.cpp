@@ -57,6 +57,13 @@ void Group::addObject(WorldEngineBase *obj)
     objects.last()->SetGlobalTransform(getLocalMatrix());
 }
 
+void Group::insertObject(WorldEngineBase *obj, const int &index)
+{
+    objects.insert(index,obj);
+
+    objects.at(index)->SetGlobalTransform(getLocalMatrix());
+}
+
 void Group::delObject(WorldEngineBase *obj)
 {
     objects.removeAll(obj); //удаляет все объекты. removeOne(obj) - удаляет первый попавшийся такой объект (обход с начала вектора)

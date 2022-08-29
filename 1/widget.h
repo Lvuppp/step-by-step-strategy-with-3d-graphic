@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "skybox.h"
 #include "character.h"
+#include "block.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -42,9 +43,9 @@ protected:
     void keyPressEvent(QKeyEvent *event);
 
     void initShaders();
-
     void initFloor(float width, float height, float depth, QImage *diffuseMap = 0, QImage *normalMap = 0);
 
+    void ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
     int SelectObject(int x, int y, QVector<WorldEngineBase *> &objs);
 
 private:
@@ -62,16 +63,13 @@ private:
 
     QVector2D MousePosition;
 
-    QVector<Character *> characters,
-                        floor;
+    QVector<Character*> characters;
+    QVector<Block*>  floor;
 
-    QVector<WorldEngineBase *> WorldObjects,
-                                selectObjects;
-
+    QVector<WorldEngineBase *> WorldObjects, selectObjects, selectedBlocks;
     QVector<Group *> groups;
 
     Camera* camera;
-
     SkyBox* skybox;
 
     QMap<qsizetype, qsizetype> character_floor;

@@ -28,9 +28,10 @@ public:
     void SetGlobalTransform(const QMatrix4x4 &q);
 
     void addObject(WorldEngineBase *obj);
-
+    void insertObject(WorldEngineBase *obj,const int& index);
     void delObject(WorldEngineBase *obj);
     void delObject(const int &&index);
+
     WorldEngineBase *getObj(qsizetype index);
 
 private:
