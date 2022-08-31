@@ -7,6 +7,7 @@
 #include <QVector>
 
 #include "worldenginebase.h"
+#include "player.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -15,14 +16,8 @@ class Block : public WorldEngineBase
 {
 public:
 
+    // класс описывает блоки по которым передвигаются персонажи
 
-    /*
-        Думаю, это что-то вроде типа персонажей.
-        В дальнейшем, в зависимости от него будет применяться
-        та или иная модель и разное количество ходов
-
-        Разумеется, нужно переназвать
-    */
     enum BlockType {
 
         rock = 0,
@@ -32,36 +27,30 @@ public:
         grass = 4
     };
 
-    Block(const QImage &texture);
-    Block(const BlockType &type);
+    Block(QImage *texture, Player *owner = nullptr);
+    Block(QImage *texture, QImage *diffuseMap, Player *owner = nullptr);
+    //Block(BlockType &type, QImage *texture, Player *owner = nullptr);
 
 
     virtual ~Block() {
-
-        for(auto object: objects)
-            delete object;
+        delete object;
 
     }
 
     const QString &GetObj() const;
     const BlockType &GetType() const;
 
-
     void ChangeAvailableStatus(); // изменения состояние выделения
     const bool &IsAvailable() const;
 
+    void InitBlock(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
+    void ChangeTexture(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
 
-    void loadObjectFromFile(const QString &path);
-    void addObject(Object3D *object );
-
-
-    Object3D *getObject(quint32 index);
     const QVector3D& GetLocation() const;
-    void ChangeMainTexture();
     QImage *getMainTexture();
 
-
     void calculateTBN(QVector<VertexData> &data); //для карты нормалей
+
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
     void Rotate(const QQuaternion &r);
     void Translate(const QVector3D &t);
@@ -70,12 +59,20 @@ public:
 
 private:
 
-    QVector<Object3D *> objects;
+    Object3D * object;
     MaterialLibrary materialLibrary;
     QImage mainTexture;
 
+    const float WIDTH = 3.0f / 2.0f;
+    const float HEIGHT = 3.0f / 2.0f;
+    const float DEPTH = 3.0f / 2.0f;
+
+
     BlockType blockType;
     bool isAvailable;
+    Player *currentBlockOwner = nullptr;
+
+    int moneyIncome;
 
 };
 

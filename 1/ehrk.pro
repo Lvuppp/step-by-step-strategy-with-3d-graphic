@@ -11,24 +11,26 @@ CONFIG += c++17
 SOURCES += \
     block.cpp \
     camera.cpp \
-    character.cpp \
     group.cpp \
     main.cpp \
     material.cpp \
     materiallibrary.cpp \
     object3d.cpp \
+    player.cpp \
     skybox.cpp \
+    unit.cpp \
     widget.cpp
 
 HEADERS += \
     block.h \
     camera.h \
-    character.h \
     group.h \
     material.h \
     materiallibrary.h \
     object3d.h \
+    player.h \
     skybox.h \
+    unit.h \
     widget.h \
     worldenginebase.h
 

@@ -2,15 +2,30 @@
 
 #include <QDir>
 
-Block::Block(const QImage& texture) : mainTexture(texture), blockType(sand), isAvailable(false)
+Block::Block(QImage *texture, Player *owner)
+    : mainTexture(*texture), blockType(sand), isAvailable(false), currentBlockOwner(owner)
 {
+    InitBlock(texture);
 }
 
-Block::Block(const BlockType &type) : blockType(type), isAvailable(false)
+Block::Block(QImage *texture, QImage *normalMap, Player *owner)
 {
-//    if (type == sand)
-//        ObjPath = ":/aloe_vera_plant/aloevera.obj";
+    InitBlock(texture, normalMap);
 }
+
+//Block::Block(QImage &texture, Player *owner) :
+//    mainTexture(texture), blockType(sand), isAvailable(false), currentBlockOwner(owner)
+//{
+
+//}
+
+
+//Block::Block(const BlockType &type) : blockType(type), isAvailable(false)
+//{
+////    if (type == sand)
+////        ObjPath = ":/aloe_vera_plant/aloevera.obj";
+//}
+
 
 const QString &Block::GetObj() const
 {
@@ -26,7 +41,6 @@ const Block::BlockType &Block::GetType() const
 void Block::ChangeAvailableStatus()
 {
     isAvailable = !isAvailable;
-    qDebug() << isAvailable;
 }
 
 const bool &Block::IsAvailable() const
@@ -34,105 +48,104 @@ const bool &Block::IsAvailable() const
     return isAvailable;
 }
 
-
-void Block::loadObjectFromFile(const QString &path)
+void Block::InitBlock(QImage *diffuseMap, QImage *normalMap)
 {
-    QFile objFile(path);
-
-    if (!objFile.exists())
-        return;
-
-    objFile.open(QIODevice::ReadOnly);
-
-    QTextStream input(&objFile);
-
-    QVector<QVector3D> coords;
-    QVector<QVector2D> texCoords;
-    QVector<QVector3D> normals;
-
 
     QVector<VertexData> vertexes;
+
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, DEPTH), QVector2D(0.0, 1.0), QVector3D(0.0, 0.0, 1.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, DEPTH), QVector2D(0.0, 0.0), QVector3D(0.0, 0.0, 1.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, DEPTH), QVector2D(1.0, 1.0), QVector3D(0.0, 0.0, 1.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, DEPTH), QVector2D(1.0, 0.0), QVector3D(0.0, 0.0, 1.0)));
+
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, DEPTH), QVector2D(0.0, 1.0), QVector3D(1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, DEPTH), QVector2D(0.0, 0.0), QVector3D(1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, -DEPTH), QVector2D(1.0, 1.0), QVector3D(1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, -DEPTH), QVector2D(1.0, 0.0), QVector3D(1.0, 0.0, 0.0)));
+
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, DEPTH), QVector2D(0.0, 1.0), QVector3D(0.0, 1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, -DEPTH), QVector2D(0.0, 0.0), QVector3D(0.0, 1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, DEPTH), QVector2D(1.0, 1.0), QVector3D(0.0, 1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, -DEPTH), QVector2D(1.0, 0.0), QVector3D(0.0, 1.0, 0.0)));
+
+    vertexes.append(VertexData(QVector3D(WIDTH, HEIGHT, -DEPTH), QVector2D(0.0, 1.0), QVector3D(0.0, 0.0, -1.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, -DEPTH), QVector2D(0.0, 0.0), QVector3D(0.0, 0.0, -1.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, -DEPTH), QVector2D(1.0, 1.0), QVector3D(0.0, 0.0, -1.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, -DEPTH), QVector2D(1.0, 0.0), QVector3D(0.0, 0.0, -1.0)));
+
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, DEPTH), QVector2D(0.0, 1.0), QVector3D(-1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, HEIGHT, -DEPTH), QVector2D(0.0, 0.0), QVector3D(-1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, DEPTH), QVector2D(1.0, 1.0), QVector3D(-1.0, 0.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, -DEPTH), QVector2D(1.0, 0.0), QVector3D(-1.0, 0.0, 0.0)));
+
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, DEPTH), QVector2D(0.0, 1.0), QVector3D(0.0, -1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(-WIDTH, -HEIGHT, -DEPTH), QVector2D(0.0, 0.0), QVector3D(0.0, -1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, DEPTH), QVector2D(1.0, 1.0), QVector3D(0.0, -1.0, 0.0)));
+    vertexes.append(VertexData(QVector3D(WIDTH, -HEIGHT, -DEPTH), QVector2D(1.0, 0.0), QVector3D(0.0, -1.0, 0.0)));
+
     QVector<GLuint> indexes;
 
-    Object3D *object = 0;
+    for (short i = 0; i < 24; i += 4) {
 
-    QString MaterialName;
-
-    while (!input.atEnd()) {
-
-        QString str = input.readLine();
-
-        QStringList list = str.split(" ");
-
-        if (list[0] == "mtllib") {
-            QFileInfo info(std::move(path));
-            materialLibrary.loadMaterialsFromFile(QString("%1/%2").arg(info.absolutePath()).arg(list[1]));
-        }
-
-        else if (list[0] == "v")
-
-            coords.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()));
-
-        else if (list[0] == "vt")
-
-            texCoords.append(QVector2D(list[1].toFloat(), list[2].toFloat()));
-
-        else if (list[0] == "vn")
-
-            normals.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()));
-
-        else if (list[0] == "f")
-
-            for (int i = 1; i <= 3; ++i) {
-
-                QStringList vert = list[i].split("/"); //индексы в obj файле начинаются с 1
-
-                vertexes.append(VertexData(coords[abs(vert[0].toLong()) - 1], texCoords[abs(vert[1].toLong()) - 1], normals[abs(vert[2].toLong()) - 1]));
-
-                indexes.append(indexes.size());
-            }
-        else if (list[0] == "usemtl") {
-
-            if (object)
-                object->Init(vertexes, indexes, materialLibrary.getMaterial(MaterialName));
-
-            MaterialName = list[1];
-
-            addObject(object);
-
-            object = new Object3D;
-
-            vertexes.clear();
-            indexes.clear();
-        }
+        indexes.append(i + 0);
+        indexes.append(i + 1);
+        indexes.append(i + 2);
+        indexes.append(i + 2);
+        indexes.append(i + 1);
+        indexes.append(i + 3);
     }
 
-    if (object)
-        object->Init(vertexes, indexes, materialLibrary.getMaterial(MaterialName));
+    Material* mtl = new Material;
 
-    addObject(object);
 
-    objFile.close();
-}
-
-void Block::addObject(Object3D *object)
-{
-    if (!object)
-        return;
-
-    if (objects.contains(object))
-        return;
-
-    objects.append(object);
-}
-
-Object3D *Block::getObject(quint32 index)
-{
-    if (index < objects.size())
-        return objects[index];
+    if (diffuseMap)
+        mtl->setDiffuseMap(*diffuseMap);
     else
-        return nullptr;
+        mtl->setDiffuseMap(":/pantone-very-peri-2022.jpg");
+
+
+    if (normalMap)
+        mtl->setNormalMap(*normalMap);
+    else
+        mtl->setNormalMap(":/ice_texture.jpg");
+
+    mainTexture = *diffuseMap;
+
+    mtl->setShinnes(96.0);
+    mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
+    mtl->setSpecularColor(QVector3D(1.0, 1.0, 1.0));
+    mtl->setAmbienceColor(QVector3D(1.0, 1.0, 1.0));
+
+    calculateTBN(vertexes);
+    object = new Object3D(vertexes, indexes, mtl);
+
 }
+
+void Block::ChangeTexture(QImage *diffuseMap, QImage *normalMap)
+{
+    Material* mtl = new Material;
+
+
+    if (diffuseMap)
+        mtl->setDiffuseMap(*diffuseMap);
+    else
+        mtl->setDiffuseMap(":/pantone-very-peri-2022.jpg");
+
+
+    if (normalMap)
+        mtl->setNormalMap(*normalMap);
+    else
+        mtl->setNormalMap(":/ice_texture.jpg");
+
+    mtl->setShinnes(96.0);
+    mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
+    mtl->setSpecularColor(QVector3D(1.0, 1.0, 1.0));
+    mtl->setAmbienceColor(QVector3D(1.0, 1.0, 1.0));
+
+    object->ChangeMaterial(mtl);
+}
+
+
 
 void Block::calculateTBN(QVector<VertexData> &data)
 {
@@ -159,10 +172,10 @@ void Block::calculateTBN(QVector<VertexData> &data)
         */
 
         QVector3D deltaPos1 = v2 - v1,
-                  deltaPos2 = v3 - v1;
+                deltaPos2 = v3 - v1;
 
         QVector2D deltaUV1 = uv2 - uv1,
-                  deltaUV2 = uv3 - uv1;
+                deltaUV2 = uv3 - uv1;
 
         float r = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
         QVector3D tangent = (deltaPos1 * deltaUV2.y() - deltaPos2 * deltaUV1.y()) * r;
@@ -176,7 +189,7 @@ void Block::calculateTBN(QVector<VertexData> &data)
 
 const QVector3D &Block::GetLocation() const
 {
-    return objects.last()->GetLocation();
+    return object->GetLocation();
 }
 
 QImage *Block::getMainTexture()
@@ -186,30 +199,25 @@ QImage *Block::getMainTexture()
 
 void Block::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
-    for (qsizetype i = 0; i < objects.size(); ++i)
-        objects[i]->draw(program, functions, usingTextures);
+    object->draw(program, functions, usingTextures);
 }
 
 void Block::Rotate(const QQuaternion &r)
 {
-    for (qsizetype i = 0; i < objects.size(); ++i)
-        objects[i]->Rotate(r);
+    object->Rotate(r);
 }
 
 void Block::Translate(const QVector3D &t)
 {
-    for (qsizetype i = 0; i < objects.size(); ++i)
-        objects[i]->Translate(std::move(t));
+    object->Translate(std::move(t));
 }
 
 void Block::Scale(const float &s)
 {
-    for (qsizetype i = 0; i < objects.size(); ++i)
-        objects[i]->Scale(s);
+    object->Scale(s);
 }
 
 void Block::SetGlobalTransform(const QMatrix4x4 &q)
 {
-    for (qsizetype i = 0; i < objects.size(); ++i)
-        objects[i]->SetGlobalTransform(q);
+    object->SetGlobalTransform(q);
 }

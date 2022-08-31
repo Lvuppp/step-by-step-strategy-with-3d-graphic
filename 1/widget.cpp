@@ -1,4 +1,4 @@
-  #include "widget.h"
+#include "widget.h"
 
 #include <QtMath>
 #include <QOpenGLFunctions>
@@ -10,6 +10,7 @@ Widget::Widget(QWidget *parent)
 
     camera->Translate(QVector3D(0.0f, 0.0f, -5.0f));
 
+
     /*
 
       Можете повернуть камеру методом
@@ -18,15 +19,20 @@ Widget::Widget(QWidget *parent)
 
     */
 
-    square = 3;
+    players.append(new Player());
+
+
+    square = 8;
 }
 
 Widget::~Widget()
 {
     delete camera;
 
-    for (qsizetype i = 0; i < characters.size(); ++i)
-        delete characters[i];
+    delete selectedUnit;
+
+    for (qsizetype i = 0; i < Units.size(); ++i)
+        delete Units[i];
 
     for (qsizetype i = 0; i < groups.size(); ++i)
         delete groups[i];
@@ -74,12 +80,17 @@ void Widget::initializeGL()
             x = -0.5;
         }
 
-        if (X == 0 || X == 1 || X == square * square - 1 || X == square * square - 2) //крайние квадратики
-                                                                    //так можно (как вариант) пометить место старта игроков
-            initBlock(3.0f, 3.0f, 3.0f, &PlTexture);
-        else
-            initBlock(3.0f, 3.0f, 3.0f, &FloorTexture, &FloorNormalMap);
+        if (/*X == 0 || X == 1 ||*/ X == square * square - 1 || X == square * square - 2){ //крайние квадратики
+            //так можно (как вариант) пометить место старта игроков
+            floor.append(new Block(&PlTexture));
+            selectedBlocks.append(floor.last());
+        }
+        else{
+            floor.append(new Block(&FloorTexture, &FloorNormalMap));
+            selectedBlocks.append(floor.last());
 
+            //initBlock(3.0f, 3.0f, 3.0f, &FloorTexture, &FloorNormalMap);
+        }
         floor.last()->Translate(QVector3D(x, y, z));
 
         groups.first()->addObject(floor.last());
@@ -96,19 +107,19 @@ void Widget::initializeGL()
 
     groups.append(new Group);
 
-    characters.append(new Character(Character::type0, square * square - 1));
-    characters.last()->loadObjectFromFile(characters.last()->GetObj());
+    Units.append(new Unit(Unit::type0, square * square - 1));
+    Units.last()->loadObjectFromFile(Units.last()->GetObj());
 
 
     QVector3D pos = floor.last()->GetLocation() + floor_pos;
-    characters.last()->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
+    Units.last()->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
 
 
-    groups.last()->addObject(characters.last());
+    groups.last()->addObject(Units.last());
 
     WorldObjects.append(groups.last());
 
-    characters.last()->Scale(15.0f);
+    Units.last()->Scale(15.0f);
 
     selectObjects.append(groups.last());
 
@@ -122,7 +133,7 @@ void Widget::resizeGL(int w, int h)
 
     ProjectionMatrix.setToIdentity();
     ProjectionMatrix.perspective(45, aspect, /*0.1f*/ 0.01f, /*10.0f*/ 1000.0f); //3 параметр: передняя плоскость отсечения,
-                                                                                //4 - задняя
+    //4 - задняя
 }
 
 void Widget::paintGL()
@@ -138,18 +149,18 @@ void Widget::paintGL()
 
     SkyBoxShaderProgram.release();
 
-    CharacterShaderProgram.bind();
+    UnitShaderProgram.bind();
 
-    CharacterShaderProgram.setUniformValue("u_projectionMatrix", ProjectionMatrix);
-    CharacterShaderProgram.setUniformValue("u_lightPosition", QVector4D(0.0, 0.0, 0.0, 1.0));
-    CharacterShaderProgram.setUniformValue("u_lightPower", 1.0f);
+    UnitShaderProgram.setUniformValue("u_projectionMatrix", ProjectionMatrix);
+    UnitShaderProgram.setUniformValue("u_lightPosition", QVector4D(0.0, 0.0, 0.0, 1.0));
+    UnitShaderProgram.setUniformValue("u_lightPower", 1.0f);
 
-    camera->draw(&CharacterShaderProgram);
+    camera->draw(&UnitShaderProgram);
 
     for (qsizetype i = 0; i < WorldObjects.size(); ++i)
-           WorldObjects[i]->draw(&CharacterShaderProgram, context()->functions());
+        WorldObjects[i]->draw(&UnitShaderProgram, context()->functions());
 
-    CharacterShaderProgram.release();
+    UnitShaderProgram.release();
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -158,62 +169,11 @@ void Widget::mousePressEvent(QMouseEvent *event)
         MousePosition = QVector2D(event->position()); //координаты указателя относительно левого верхнего угла данного окна
 
     else if (event->button() == Qt::RightButton) {
-
-
-        int indexOfSelectedCharacter = SelectObject(event->position().x(), event->position().y(), selectObjects);
-        int indexOfSelectedBlock = SelectObject(event->position().x(), event->position().y(), selectedBlocks);
-
-        qDebug() << indexOfSelectedCharacter;
-        qDebug() << indexOfSelectedBlock;
-
-        if (indexOfSelectedCharacter == 0 && selectedCharacter == nullptr){
-            return;
-        }
-
-        if(indexOfSelectedCharacter != 0){
-
-            indexOfSelectedCharacter--;
-            qsizetype charactersBlock = characters[indexOfSelectedCharacter]->getBlockPosition();
-            QVector<qsizetype> avalibaleBlocks  = characters[indexOfSelectedCharacter]->AvailableSteps(charactersBlock, square);
-
-            if(selectedCharacter == nullptr){
-                selectedCharacter = characters[indexOfSelectedCharacter];
-                ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
-
-            }
-            else if(selectedCharacter == characters[indexOfSelectedCharacter]){
-                ChangeBlockTexture(avalibaleBlocks);
-                selectedCharacter = nullptr;
-
-            }
-            else{
-                QVector<qsizetype> oldSelectedCharacterAvalibaleBlocks =
-                        selectedCharacter->AvailableSteps(selectedCharacter->getBlockPosition(),square);
-
-                ChangeBlockTexture(oldSelectedCharacterAvalibaleBlocks);
-
-                selectedCharacter = characters[indexOfSelectedCharacter];
-                ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
-
-            }
-        }
-        else if(indexOfSelectedBlock != 0 && floor[--indexOfSelectedBlock]->IsAvailable()){
-
-            selectedCharacter->Translate(floor[indexOfSelectedBlock]->GetLocation() -
-                                         floor[selectedCharacter->getBlockPosition()]->GetLocation());
-
-            QVector<qsizetype> oldSelectedCharacterAvalibaleBlocks =
-                    selectedCharacter->AvailableSteps(selectedCharacter->getBlockPosition(),square);
-
-            ChangeBlockTexture(oldSelectedCharacterAvalibaleBlocks);
-
-            selectedCharacter->SetBlockPosition(indexOfSelectedBlock + 1);
-            selectedCharacter = nullptr;
-
-            update();
-        }
+        TakeStep(SelectObject(event->position().x(), event->position().y(), selectObjects) - 1,
+                 SelectObject(event->position().x(), event->position().y(), selectedBlocks) - 1);
 
     }
+
     event->accept();
 }
 
@@ -225,7 +185,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     MousePosition = QVector2D(event->position()); //localPos()
 
     float angX = diff.y() / 2.0f,
-          angY = diff.x() / 2.0f;
+            angY = diff.x() / 2.0f;
 
     camera->RotateX(QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, angX));
     camera->RotateY(QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, angY));
@@ -270,116 +230,87 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
 void Widget::initShaders()
 {
-   if (!CharacterShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vcharacter.vsh"))
-       exit(-230);
+    if (!UnitShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vcharacter.vsh"))
+        exit(-230);
 
-   if (!CharacterShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fcharacter.fsh"))
-       exit(-229);
+    if (!UnitShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fcharacter.fsh"))
+        exit(-229);
 
-   if (!CharacterShaderProgram.link())
-       exit(-228);
-
-
-
-   if (!SkyBoxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vskybox.vsh"))
-       exit(-2330);
-
-   if (!SkyBoxShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fskybox.fsh"))
-       exit(-2229);
-
-   if (!SkyBoxShaderProgram.link())
-       exit(-2228);
+    if (!UnitShaderProgram.link())
+        exit(-228);
 
 
 
-   if (!SelectShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vselect.vsh"))
-       exit(-2013);
+    if (!SkyBoxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vskybox.vsh"))
+        exit(-2330);
 
-   if (!SelectShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fselect.fsh"))
-       exit(-2019);
+    if (!SkyBoxShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fskybox.fsh"))
+        exit(-2229);
 
-   if (!SelectShaderProgram.link())
-       exit(-2018);
+    if (!SkyBoxShaderProgram.link())
+        exit(-2228);
+
+
+
+    if (!SelectShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vselect.vsh"))
+        exit(-2013);
+
+    if (!SelectShaderProgram.addCacheableShaderFromSourceFile(QOpenGLShader::Fragment, ":/fselect.fsh"))
+        exit(-2019);
+
+    if (!SelectShaderProgram.link())
+        exit(-2018);
 }
 
-void Widget::initBlock(float width, float height, float depth, QImage *diffuseMap, QImage *normalMap)
+void Widget::TakeStep(const int &indexOfUnit,const int &indexOfBlock) ///надо перенести в логику персонажа
 {
-    float w_by2 = width / 2.0f;
 
-    float h_by2 = height / 2.0f;
-
-    float d_by2 = depth / 2.0f;
-
-    QVector<VertexData> vertexes;
-
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, d_by2), QVector2D(0.0, 1.0), QVector3D(0.0, 0.0, 1.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, d_by2), QVector2D(0.0, 0.0), QVector3D(0.0, 0.0, 1.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, d_by2), QVector2D(1.0, 1.0), QVector3D(0.0, 0.0, 1.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, d_by2), QVector2D(1.0, 0.0), QVector3D(0.0, 0.0, 1.0)));
-
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, d_by2), QVector2D(0.0, 1.0), QVector3D(1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, d_by2), QVector2D(0.0, 0.0), QVector3D(1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, -d_by2), QVector2D(1.0, 1.0), QVector3D(1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, -d_by2), QVector2D(1.0, 0.0), QVector3D(1.0, 0.0, 0.0)));
-
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, d_by2), QVector2D(0.0, 1.0), QVector3D(0.0, 1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, -d_by2), QVector2D(0.0, 0.0), QVector3D(0.0, 1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, d_by2), QVector2D(1.0, 1.0), QVector3D(0.0, 1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, -d_by2), QVector2D(1.0, 0.0), QVector3D(0.0, 1.0, 0.0)));
-
-    vertexes.append(VertexData(QVector3D(w_by2, h_by2, -d_by2), QVector2D(0.0, 1.0), QVector3D(0.0, 0.0, -1.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, -d_by2), QVector2D(0.0, 0.0), QVector3D(0.0, 0.0, -1.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, -d_by2), QVector2D(1.0, 1.0), QVector3D(0.0, 0.0, -1.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, -d_by2), QVector2D(1.0, 0.0), QVector3D(0.0, 0.0, -1.0)));
-
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, d_by2), QVector2D(0.0, 1.0), QVector3D(-1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, h_by2, -d_by2), QVector2D(0.0, 0.0), QVector3D(-1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, d_by2), QVector2D(1.0, 1.0), QVector3D(-1.0, 0.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, -d_by2), QVector2D(1.0, 0.0), QVector3D(-1.0, 0.0, 0.0)));
-
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, d_by2), QVector2D(0.0, 1.0), QVector3D(0.0, -1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(-w_by2, -h_by2, -d_by2), QVector2D(0.0, 0.0), QVector3D(0.0, -1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, d_by2), QVector2D(1.0, 1.0), QVector3D(0.0, -1.0, 0.0)));
-    vertexes.append(VertexData(QVector3D(w_by2, -h_by2, -d_by2), QVector2D(1.0, 0.0), QVector3D(0.0, -1.0, 0.0)));
-
-    QVector<GLuint> indexes;
-
-    for (short i = 0; i < 24; i += 4) {
-
-        indexes.append(i + 0);
-        indexes.append(i + 1);
-        indexes.append(i + 2);
-        indexes.append(i + 2);
-        indexes.append(i + 1);
-        indexes.append(i + 3);
+    if (indexOfUnit == -1 && selectedUnit == nullptr){
+        return;
     }
 
-    Material* mtl = new Material;
+    if(indexOfUnit != -1){
 
+        qsizetype UnitsBlock = Units[indexOfUnit]->getBlockPosition();
+        QVector<qsizetype> avalibaleBlocks  = Units[indexOfUnit]->AvailableSteps(UnitsBlock, square);
 
-    if (diffuseMap)
-        mtl->setDiffuseMap(*diffuseMap);
-    else
-        mtl->setDiffuseMap(":/pantone-very-peri-2022.jpg");
+        if(selectedUnit == nullptr){
+            selectedUnit = Units[indexOfUnit];
+            ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
 
+        }
+        else if(selectedUnit == Units[indexOfUnit]){
+            ChangeBlockTexture(avalibaleBlocks);
+            selectedUnit = nullptr;
 
-    if (normalMap)
-        mtl->setNormalMap(*normalMap);
-    else
-        mtl->setNormalMap(":/ice_texture.jpg");
+        }
+        else{
+            QVector<qsizetype> oldSelectedUnitAvalibaleBlocks =
+                    selectedUnit->AvailableSteps(selectedUnit->getBlockPosition(),square);
 
-    mtl->setShinnes(96.0);
-    mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
-    mtl->setSpecularColor(QVector3D(1.0, 1.0, 1.0));
-    mtl->setAmbienceColor(QVector3D(1.0, 1.0, 1.0));
+            ChangeBlockTexture(oldSelectedUnitAvalibaleBlocks);
 
-    Block *newObj = new Block(mtl->getDiffuseMap());
+            selectedUnit = Units[indexOfUnit];
+            ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
 
-    newObj->calculateTBN(vertexes);
-    newObj->addObject(new Object3D(vertexes, indexes, mtl));
+        }
+    }
+    else if(indexOfBlock != -1 && floor[indexOfBlock]->IsAvailable()){
 
-    floor.append(newObj);
-    selectedBlocks.append(floor.last());
+        selectedUnit->Translate(floor[indexOfBlock]->GetLocation() -
+                                floor[selectedUnit->getBlockPosition()]->GetLocation());
+
+        QVector<qsizetype> oldSelectedUnitAvalibaleBlocks =
+                selectedUnit->AvailableSteps(selectedUnit->getBlockPosition(),square);
+
+        ChangeBlockTexture(oldSelectedUnitAvalibaleBlocks);
+
+        selectedUnit->SetBlockPosition(indexOfBlock);
+        selectedUnit = nullptr;
+
+        update();
+    }
+
 }
 
 void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
@@ -391,18 +322,14 @@ void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
         if(blockIndex >= square * square || blockIndex <= 0)
             continue;
 
+        if(texture == nullptr){
+            floor[blockIndex]->ChangeTexture(floor[blockIndex]->getMainTexture());
+        }
+        else{
+            floor[blockIndex]->ChangeTexture(texture);
+        }
 
-        QVector3D blockPosition = floor[blockIndex]->GetLocation();
-        groups.first()->delObject(blockIndex);
-
-        if(texture == nullptr)
-            initBlock(3.0f, 3.0f, 3.0f, floor.at(blockIndex)->getMainTexture());
-        else
-            initBlock(3.0f, 3.0f, 3.0f, texture);
-
-        floor.last()->Translate(blockPosition);
         floor[blockIndex]->ChangeAvailableStatus();
-        groups.first()->insertObject(floor.last(),blockIndex);
     }
 
     update();

@@ -84,8 +84,17 @@ void Object3D::Init(const QVector<VertexData> &data, const QVector<GLuint> &inde
     IndexBuffer.allocate(indexes.constData(), indexes.size() * sizeof(GLuint));
     IndexBuffer.release();
 
-    this->material = material;
+    ChangeMaterial(material);
+}
 
+const QVector3D &Object3D::GetLocation() const
+{
+    return translate;
+}
+
+void Object3D::ChangeMaterial(Material *material)
+{
+    this->material = material;
 
     if (material->isDiffuseMapSet()) {
 
@@ -110,11 +119,6 @@ void Object3D::Init(const QVector<VertexData> &data, const QVector<GLuint> &inde
         normalMap->setWrapMode(QOpenGLTexture::Repeat);
 
     }
-}
-
-const QVector3D &Object3D::GetLocation() const
-{
-    return translate;
 }
 
 void Object3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)

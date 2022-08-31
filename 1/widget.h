@@ -12,7 +12,7 @@
 #include "group.h"
 #include "camera.h"
 #include "skybox.h"
-#include "character.h"
+#include "unit.h"
 #include "block.h"
 
 #include <QMouseEvent>
@@ -44,6 +44,7 @@ protected:
 
     void initShaders();
     void initBlock(float width, float height, float depth, QImage *diffuseMap = 0, QImage *normalMap = 0);
+    void TakeStep(const int& indexOfBlock, const int& indexOfUnit);
 
     void ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
     int SelectObject(int x, int y, QVector<WorldEngineBase *> &objs);
@@ -57,13 +58,13 @@ private:
                LightMatrix,
                ShadowLightMatrix*/;
 
-    QOpenGLShaderProgram CharacterShaderProgram,
+    QOpenGLShaderProgram UnitShaderProgram,
                            SkyBoxShaderProgram,
                             SelectShaderProgram;
 
     QVector2D MousePosition;
 
-    QVector<Character*> characters;
+    QVector<Unit*> Units;
     QVector<Block*>  floor;
 
     QVector<WorldEngineBase *> WorldObjects, selectObjects, selectedBlocks;
@@ -72,18 +73,7 @@ private:
     Camera* camera;
     SkyBox* skybox;
 
-    QMap<qsizetype, qsizetype> character_floor;
-    /*
-
-      map, потому что нужно понимать, под какой моделькой какой куб находится.
-      так как шейдерная программа на первом этапе отрабатывает только для
-      персонажей, мы не можем понять, на каком кубе он находится.
-      поэтому, задаём соответствие между индексом полученной модельки и
-      номером куба, на которой она была отрисована. скорее всего, тут
-      есть и другое решение. можно, как вариант, добавить какой-нибудь метод
-      в класс Character, куда можно передать индекс, и впоследствии его достать
-
-    */
+    // мап убрал т.к перенёс эту логику в блоки
 
     qsizetype square;
 
@@ -97,6 +87,8 @@ private:
     */
 
 
-    Character *selectedCharacter = nullptr;
+    QVector<Player *> players;
+
+    Unit *selectedUnit = nullptr; // выбранный персонаж, требуется для запоминания текущего выбранного пперсонажа
 };
 #endif // WIDGET_H

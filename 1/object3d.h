@@ -46,6 +46,8 @@ public:
 
     const QVector3D &GetLocation() const;
 
+    void ChangeMaterial(Material *material);
+
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
 
     void Rotate(const QQuaternion &r);

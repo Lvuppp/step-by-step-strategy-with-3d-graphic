@@ -1,12 +1,13 @@
 release/block.o
 release/camera.o
-release/character.o
 release/group.o
 release/main.o
 release/material.o
 release/materiallibrary.o
 release/object3d.o
+release/player.o
 release/skybox.o
+release/unit.o
 release/widget.o
 release/qrc_models.o
 release/qrc_shaders.o
