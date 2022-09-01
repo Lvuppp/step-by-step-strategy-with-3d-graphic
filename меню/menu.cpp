@@ -7,8 +7,6 @@ Menu::Menu(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Menu)
 {
-    //resize(width(), height());
-
     ui->setupUi(this);
 
     ChangeBackgroundColor(0, 0, 0);
