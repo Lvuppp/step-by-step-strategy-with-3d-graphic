@@ -33,13 +33,12 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
-//    void FinishTurn(); // завершение хода
 
 public slots:
-    void FinishTurn();
+    void FinishTurn(); // окончание хода
     void keyPress(QKeyEvent *event);
-
 protected:
+
 
     void initializeGL(); //вызывается один раз, при создании приложения
     void resizeGL(int w, int h); //вызывается при масштабировании окна

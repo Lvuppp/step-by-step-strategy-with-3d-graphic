@@ -168,10 +168,19 @@ void Widget::mousePressEvent(QMouseEvent *event)
         int blockIndex = SelectObject(event->position().x(), event->position().y(), selectedBlocks) - 1;
         int unitIndex = SelectObject(event->position().x(), event->position().y(), selectedUnitsOfPlayer) - 1;
 
-        if(isUnitBoughtToCreate && currentPlayer != nullptr && floor[blockIndex]->GetOwner() == currentPlayer && unitIndex == -1){
+        if(isUnitBoughtToCreate == true
+                && currentPlayer != nullptr
+                && floor[blockIndex]->GetOwner() == currentPlayer
+                && unitIndex == -1
+                && floor[blockIndex]->IsOccupied() == false)
+        {
             CreateUnit(blockIndex);
         }
-        else if(isBuildingBoughtToCreate && currentPlayer != nullptr && floor[blockIndex]->GetOwner() == currentPlayer){
+        else if(isBuildingBoughtToCreate == true
+                && currentPlayer != nullptr
+                && floor[blockIndex]->GetOwner() == currentPlayer
+                && floor[blockIndex]->IsOccupied() == false)
+        {
             CreateBuilding(blockIndex);
         }
         else{
@@ -308,7 +317,8 @@ void Widget::TakeStep(const int &indexOfUnit,const int &indexOfBlock) ///над�
 
         }
     }
-    else if(selectedUnit != nullptr && indexOfBlock != -1 && floor[indexOfBlock]->IsAvailableToStep(selectedUnit->GetLevelOfAttack())) {
+    else if(selectedUnit != nullptr
+            && indexOfBlock != -1 && floor[indexOfBlock]->IsAvailableToStep(selectedUnit->GetLevelOfAttack())) {
 
         selectedUnit->Translate(floor[indexOfBlock]->GetLocation() -
                                 floor[selectedUnit->GetBlockPosition()]->GetLocation());
@@ -335,7 +345,7 @@ void Widget::CreateUnit(const int &blockPosition)
 {
 
     QVector3D floor_pos(-square, -3.5f, -square);
-    units.append(new Unit(Unit::type0, blockPosition));
+    units.append(new Unit(Unit::knight, blockPosition));
     units.last()->loadObjectFromFile(units.last()->GetObj());
 
     QVector3D pos = floor[blockPosition]->GetLocation() + floor_pos;

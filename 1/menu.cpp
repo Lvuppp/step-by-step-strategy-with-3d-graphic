@@ -19,8 +19,11 @@ Menu::Menu(QWidget *parent) :
 
     w->resize(ui->openGLWidget->width(), ui->openGLWidget->height());
 
-    AddImage(ui->CharacterImages, ":/pantone-very-peri-2022.jpg", 30);
-    AddImage(ui->CharacterImages, ":/_floor.jpg");
+    AddImage(ui->CharacterImages, ":/icons/Cards_Knight.png", 80);
+    AddImage(ui->CharacterImages, ":/icons/Cards_Archers.png", 80);
+    AddImage(ui->CharacterImages, ":/icons/Cards_Heal.png", 80);
+    AddImage(ui->CharacterImages, ":/icons/Cards_Wizard.png", 80);
+    AddImage(ui->CharacterImages, ":/icons/Cards_Golem.png", 80);
 
     AddImage(ui->BuildingImages, ":/cl_ppl.jpg");
 
@@ -80,7 +83,7 @@ void Menu::AddImage(QHBoxLayout *layout, const QString &ImagePath, const int& si
 
     QLabel* itm = new QLabel(this);
 
-    itm->setPixmap(picture.scaled(size, size));
+    itm->setPixmap(picture.scaled(size * 0.83, size));
 
     layout->addWidget(itm);
 

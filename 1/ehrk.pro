@@ -12,6 +12,8 @@ SOURCES += \
     block.cpp \
     building.cpp \
     camera.cpp \
+    defensebuilding.cpp \
+    extractionbuilding.cpp \
     group.cpp \
     iplayer.cpp \
     main.cpp \
@@ -28,6 +30,8 @@ HEADERS += \
     block.h \
     building.h \
     camera.h \
+    defensebuilding.h \
+    extractionbuilding.h \
     group.h \
     iplayer.h \
     material.h \

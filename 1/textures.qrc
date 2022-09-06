@@ -5,5 +5,10 @@
         <file>_floor.jpg</file>
         <file>pantone-very-peri-2022.jpg</file>
         <file>ice_texture.jpg</file>
+        <file>icons/Cards_Archers.png</file>
+        <file>icons/Cards_Golem.png</file>
+        <file>icons/Cards_Heal.png</file>
+        <file>icons/Cards_Knight.png</file>
+        <file>icons/Cards_Wizard.png</file>
     </qresource>
 </RCC>

@@ -39,6 +39,16 @@ bool Block::IsAvailableToStep(const int &levelOfAttack) const
     return (levelOfAttack >= levelOfDefense);
 }
 
+bool Block::IsOwned() const
+{
+    return (currentBlockOwner != nullptr);
+}
+
+const bool &Block::IsOccupied() const
+{
+    return isOccupied;
+}
+
 void Block::InitBlock(QImage *diffuseMap, QImage *normalMap)
 {
 

@@ -23,14 +23,16 @@ public:
         Разумеется, нужно переназвать
     */
 
-    enum Type {
-
-        type0 = 0,
-        type1 = 1
+    enum UnitType {
+        knight = 0,
+        archer = 1,
+        cleric = 2,
+        mage = 3,
+        golem = 4
     };
 
     Unit();
-    Unit(const Type &type, const int& position);
+    Unit(const UnitType &type, const int& position);
 
     virtual ~Unit() {
 
@@ -59,7 +61,7 @@ public:
     const QVector3D& GetLocation() const;
     const int &GetBlockPosition() const;
     const QString &GetObj() const;
-    const Type &GetType() const;
+    const UnitType &GetType() const;
     const int &GetCost() const;
     const int &GetStamina() const;
     Object3D *GetObject(quint32 index);
@@ -72,6 +74,7 @@ private:
 
     int positionOnBlock;
 
+    UnitType unitType;
     int stamina = 0;
     int cost;
 

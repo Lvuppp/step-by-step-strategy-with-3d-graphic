@@ -6,9 +6,9 @@ Unit::Unit()
 {
 }
 
-Unit::Unit(const Type &type,const int& position) :  positionOnBlock(position)
+Unit::Unit(const UnitType &type,const int& position) :  positionOnBlock(position)
 {
-    if (type == type0){
+    if (type == knight){
         ObjPath = ":/aloe_vera_plant/aloevera.obj";
         levelOfAttack = levelOfDefense = 1;
     }

@@ -15,14 +15,9 @@
 class Building : public WorldEngineBase
 {
 public:
-    enum Type {
-
-        type0 = 0,
-        type1 = 1
-    };
 
     Building();
-    Building(const Type &type, const int& position);
+    Building(const int& position);
 
     virtual ~Building() {
 
@@ -48,11 +43,10 @@ public:
     const QVector3D& GetLocation() const;
     const int& GetBlockPosition() const;
     const QString &GetObj() const;
-    const Type &GetType() const;
     const int &GetCost() const;
     Object3D *GetObject(quint32 index);
 
-private:
+protected:
 
     QVector<Object3D *> objects;
     MaterialLibrary materialLibrary;
@@ -62,7 +56,6 @@ private:
 
     int cost;
 
-    Type BuildingType;
 };
 
 #endif // BUILDING_H

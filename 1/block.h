@@ -41,8 +41,10 @@ public:
 
     void ChangeAvailableToStepStatus();
     void ChangeLevelOfDefense(const int &levelOfAttack);
+
     bool IsAvailableToStep(const int& levelOfAttack) const;
     bool IsOwned() const;
+    const bool &IsOccupied() const;
 
     void InitBlock(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
     void ChangeTexture(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
@@ -71,6 +73,7 @@ private:
     const float DEPTH = 3.0f / 2.0f;
 
     bool isAvailableToStep = false;
+    bool isOccupied;
     BlockType blockType = sand;
     int levelOfDefense = 0;
     int moneyIncome;
