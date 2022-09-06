@@ -2,13 +2,21 @@
 #define PLAYER_H
 
 #include "unit.h"
+#include "iplayer.h"
 
-class Player
+class Player : public IPlayer
 {
 public:
     Player();
 
-    void AddUnit(Unit *unit);
+    ~Player(){
+    };
+
+    void AddUnit(Unit *unit) override;
+    void AddBuilding(Building *building) override;
+    QImage &GetPlayerTexture() override;
+    void RestoreUnitsStamina() override;
+    QVector<WorldEngineBase *> GetUnits() override;
 
 private:
     int moneyPoints;
@@ -19,8 +27,11 @@ private:
     // int sciencePoints;
     // int sciencePointsIncome;
 
-    QVector<Unit *> availableUnits;
-
+    QVector<WorldEngineBase *> selectedPlayerUnits;
+    QVector<Unit *> playerUnits;
+    QVector<Building *> playerBuilding;
+    QImage playerTexture; // сделать либо выбор текстуры, либо просто на рандом
+                                                //(Каждая текстура это просто разный цвет)
 };
 
 #endif // PLAYER_H

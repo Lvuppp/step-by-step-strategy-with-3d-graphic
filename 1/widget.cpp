@@ -19,7 +19,12 @@ Widget::Widget(QWidget *parent)
 
     */
 
+    foreach(auto line, mapMatrix){
+        line.resize(square + 2);
+    }
+
     players.append(new Player());
+    currentPlayer = players[0];
 
 
     square = 8;
@@ -28,15 +33,21 @@ Widget::Widget(QWidget *parent)
 Widget::~Widget()
 {
     delete camera;
+    delete skybox;
 
     delete selectedUnit;
-
-    for (qsizetype i = 0; i < Units.size(); ++i)
-        delete Units[i];
+    delete currentPlayer;
 
     for (qsizetype i = 0; i < groups.size(); ++i)
         delete groups[i];
 }
+
+void Widget::FinishTurn()
+{
+    if(currentPlayer != nullptr)
+        currentPlayer->RestoreUnitsStamina();
+}
+
 
 void Widget::initializeGL()
 {
@@ -56,22 +67,22 @@ void Widget::initializeGL()
 
     float x = -0.5f, y = -3.5f, z = -8.0;
 
-    /*
+    for (int rowIndex = 0; rowIndex < square + 2; ++rowIndex) {
+        mapMatrix.push_back(QVector<qsizetype>(square + 2));
 
-        ниже сам цикл отрисовки карты
+        if(rowIndex == 0 || rowIndex == square + 1)
+            continue;
 
-        строки
+        for(int lineIndex = 0; lineIndex < mapMatrix[0].size(); ++lineIndex){
+            if(lineIndex != 0 && lineIndex != square + 1)
+                mapMatrix[rowIndex][lineIndex] = 1;
+        }
+    }
 
-        initBlock...,
+    for (int i = 0; i < mapMatrix.size(); ++i) {
+        qDebug() << mapMatrix[i];
+    }
 
-        floor.last()->...,
-
-        groups.last()..
-
-        НЕ ТРОГАТЬ,
-        если (когда) будете изменять карту
-
-    */
 
     for (short X = 0; X < square * square; ++X) {
 
@@ -82,14 +93,13 @@ void Widget::initializeGL()
 
         if (/*X == 0 || X == 1 ||*/ X == square * square - 1 || X == square * square - 2){ //крайние квадратики
             //так можно (как вариант) пометить место старта игроков
-            floor.append(new Block(&PlTexture));
-            selectedBlocks.append(floor.last());
-        }
-        else{
-            floor.append(new Block(&FloorTexture, &FloorNormalMap));
+            floor.append(new Block(&PlTexture, Block::rock, players[0]));
             selectedBlocks.append(floor.last());
 
-            //initBlock(3.0f, 3.0f, 3.0f, &FloorTexture, &FloorNormalMap);
+        }
+        else{
+            floor.append(new Block(&FloorTexture, &FloorNormalMap,Block::rock));
+            selectedBlocks.append(floor.last());
         }
         floor.last()->Translate(QVector3D(x, y, z));
 
@@ -104,24 +114,9 @@ void Widget::initializeGL()
     QVector3D floor_pos(-square, -3.5f, -square);
     groups.first()->Translate(QVector3D(floor_pos));
 
-
     groups.append(new Group);
 
-    Units.append(new Unit(Unit::type0, square * square - 1));
-    Units.last()->loadObjectFromFile(Units.last()->GetObj());
-
-
-    QVector3D pos = floor.last()->GetLocation() + floor_pos;
-    Units.last()->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
-
-
-    groups.last()->addObject(Units.last());
-
-    WorldObjects.append(groups.last());
-
-    Units.last()->Scale(15.0f);
-
-    selectObjects.append(groups.last());
+    CreateUnit(square * square - 1);
 
     skybox = new SkyBox(100.0f, QImage(":/skybox0.png"));
 
@@ -165,14 +160,26 @@ void Widget::paintGL()
 
 void Widget::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
+    if (event->button() == Qt::LeftButton){
         MousePosition = QVector2D(event->position()); //координаты указателя относительно левого верхнего угла данного окна
-
-    else if (event->button() == Qt::RightButton) {
-        TakeStep(SelectObject(event->position().x(), event->position().y(), selectObjects) - 1,
-                 SelectObject(event->position().x(), event->position().y(), selectedBlocks) - 1);
-
     }
+    else if (event->button() == Qt::RightButton) {
+        QVector<WorldEngineBase *> selectedUnitsOfPlayer(currentPlayer->GetUnits());
+        int blockIndex = SelectObject(event->position().x(), event->position().y(), selectedBlocks) - 1;
+        int unitIndex = SelectObject(event->position().x(), event->position().y(), selectedUnitsOfPlayer) - 1;
+
+        if(isUnitBoughtToCreate && currentPlayer != nullptr && floor[blockIndex]->GetOwner() == currentPlayer && unitIndex == -1){
+            CreateUnit(blockIndex);
+        }
+        else if(isBuildingBoughtToCreate && currentPlayer != nullptr && floor[blockIndex]->GetOwner() == currentPlayer){
+            CreateBuilding(blockIndex);
+        }
+        else{
+            TakeStep(unitIndex, blockIndex);
+        }
+    }
+
+    update();
 
     event->accept();
 }
@@ -184,8 +191,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
 
     MousePosition = QVector2D(event->position()); //localPos()
 
-    float angX = diff.y() / 2.0f,
-            angY = diff.x() / 2.0f;
+    float angX = diff.y() / 2.0f, angY = diff.x() / 2.0f;
 
     camera->RotateX(QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, angX));
     camera->RotateY(QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, angY));
@@ -204,26 +210,34 @@ void Widget::wheelEvent(QWheelEvent *event)
     update();
 }
 
-void Widget::keyPressEvent(QKeyEvent *event)
+void Widget::keyPress(QKeyEvent *event)
 {
     switch(event->key()) {
 
-    case Qt::Key_Left:
+    case Qt::Key_A:
         camera->Translate(QVector3D(0.5f, 0.0f, 0.0f));
         break;
 
-    case Qt::Key_Right:
+    case Qt::Key_D:
         camera->Translate(QVector3D(-0.5f, 0.0f, 0.0f));
         break;
 
-    case Qt::Key_Up:
+    case Qt::Key_W:
         camera->Translate(QVector3D(0.0f, 0.0f, 0.5f));
         break;
 
-    case Qt::Key_Down:
+    case Qt::Key_S:
         camera->Translate(QVector3D(0.0f, 0.0f, -0.5f));
-    }
+        break;
 
+    case Qt::Key_F1:
+        isUnitBoughtToCreate = !isUnitBoughtToCreate;
+        break;
+
+    case Qt::Key_F2:
+        isBuildingBoughtToCreate = !isBuildingBoughtToCreate;
+        break;
+    }
 
     update();
 }
@@ -269,51 +283,93 @@ void Widget::TakeStep(const int &indexOfUnit,const int &indexOfBlock) ///над�
         return;
     }
 
-    if(indexOfUnit != -1){
+    if(indexOfUnit != -1 && units[indexOfUnit]->GetStamina() > 0){
 
-        qsizetype UnitsBlock = Units[indexOfUnit]->getBlockPosition();
-        QVector<qsizetype> avalibaleBlocks  = Units[indexOfUnit]->AvailableSteps(UnitsBlock, square);
+        QVector<qsizetype> avalibaleBlocks  = units[indexOfUnit]->AvailableSteps(square, mapMatrix);
+        qDebug() << avalibaleBlocks;
 
         if(selectedUnit == nullptr){
-            selectedUnit = Units[indexOfUnit];
-            ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
+            selectedUnit = units[indexOfUnit];
+            ChangeBlocksTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
 
         }
-        else if(selectedUnit == Units[indexOfUnit]){
-            ChangeBlockTexture(avalibaleBlocks);
+        else if(selectedUnit == units[indexOfUnit]){
+            ChangeBlocksTexture(avalibaleBlocks);
             selectedUnit = nullptr;
-
         }
         else{
             QVector<qsizetype> oldSelectedUnitAvalibaleBlocks =
-                    selectedUnit->AvailableSteps(selectedUnit->getBlockPosition(),square);
+                    selectedUnit->AvailableSteps(square,mapMatrix);
 
-            ChangeBlockTexture(oldSelectedUnitAvalibaleBlocks);
+            ChangeBlocksTexture(oldSelectedUnitAvalibaleBlocks);
 
-            selectedUnit = Units[indexOfUnit];
-            ChangeBlockTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
+            selectedUnit = units[indexOfUnit];
+            ChangeBlocksTexture(avalibaleBlocks, new QImage(":/_floor.jpg"));
 
         }
     }
-    else if(indexOfBlock != -1 && floor[indexOfBlock]->IsAvailable()){
+    else if(selectedUnit != nullptr && indexOfBlock != -1 && floor[indexOfBlock]->IsAvailableToStep(selectedUnit->GetLevelOfAttack())) {
 
         selectedUnit->Translate(floor[indexOfBlock]->GetLocation() -
-                                floor[selectedUnit->getBlockPosition()]->GetLocation());
+                                floor[selectedUnit->GetBlockPosition()]->GetLocation());
 
-        QVector<qsizetype> oldSelectedUnitAvalibaleBlocks =
-                selectedUnit->AvailableSteps(selectedUnit->getBlockPosition(),square);
+        QVector<qsizetype> avalibaleBlocksForOldSelectedUnit =
+                selectedUnit->AvailableSteps(square,mapMatrix);
 
-        ChangeBlockTexture(oldSelectedUnitAvalibaleBlocks);
+        ChangeBlocksTexture(avalibaleBlocksForOldSelectedUnit);
 
         selectedUnit->SetBlockPosition(indexOfBlock);
+        selectedUnit->DicreaseStamina();
+
+        floor[indexOfBlock]->ChangeTexture(&players[0]->GetPlayerTexture());
+        floor[indexOfBlock]->ChangeOwner(players[0]);
+        floor[indexOfBlock]->ChangeLevelOfDefense(selectedUnit->GetLevelOfAttack());
+
         selectedUnit = nullptr;
 
-        update();
     }
 
 }
 
-void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
+void Widget::CreateUnit(const int &blockPosition)
+{
+
+    QVector3D floor_pos(-square, -3.5f, -square);
+    units.append(new Unit(Unit::type0, blockPosition));
+    units.last()->loadObjectFromFile(units.last()->GetObj());
+
+    QVector3D pos = floor[blockPosition]->GetLocation() + floor_pos;
+    units.last()->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
+    units.last()->Scale(15.0f);
+
+    groups.at(1)->addObject(units.last());
+    WorldObjects.append(groups.at(1));
+
+    currentPlayer->AddUnit(units.last());
+
+    isUnitBoughtToCreate = false;
+
+}
+
+void Widget::CreateBuilding(const int &blockPosition)
+{
+
+    QVector3D floor_pos(-square, -3.5f, -square);
+    buildings.append(new Building(Building::type0, blockPosition));
+    buildings.last()->loadObjectFromFile(buildings.last()->GetObj());
+
+    QVector3D pos = floor[blockPosition]->GetLocation() + floor_pos;
+    buildings.last()->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
+    buildings.last()->Scale(2.5f);
+
+    groups.last()->addObject(buildings.last());
+    WorldObjects.append(groups.last());
+
+    currentPlayer->AddBuilding(buildings.last());
+    isBuildingBoughtToCreate = false;
+
+}
+void Widget::ChangeBlocksTexture(QVector<qsizetype> blocks, QImage *texture)
 {
     for (qsizetype j = 0; j < blocks.size(); ++j) {
 
@@ -329,7 +385,7 @@ void Widget::ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture)
             floor[blockIndex]->ChangeTexture(texture);
         }
 
-        floor[blockIndex]->ChangeAvailableStatus();
+        floor[blockIndex]->ChangeAvailableToStepStatus();
     }
 
     update();

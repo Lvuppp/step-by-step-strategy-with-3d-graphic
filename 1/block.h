@@ -27,29 +27,32 @@ public:
         grass = 4
     };
 
-    Block(QImage *texture, Player *owner = nullptr);
-    Block(QImage *texture, QImage *diffuseMap, Player *owner = nullptr);
-    //Block(BlockType &type, QImage *texture, Player *owner = nullptr);
+    Block(QImage *texture, const BlockType &blockType, Player *owner = nullptr);
+    Block(QImage *texture, QImage *diffuseMap, const BlockType &blockType, Player *owner = nullptr);
 
 
     virtual ~Block() {
         delete object;
-
     }
 
     const QString &GetObj() const;
     const BlockType &GetType() const;
+    Player *GetOwner();
 
-    void ChangeAvailableStatus(); // изменения состояние выделения
-    const bool &IsAvailable() const;
+    void ChangeAvailableToStepStatus();
+    void ChangeLevelOfDefense(const int &levelOfAttack);
+    bool IsAvailableToStep(const int& levelOfAttack) const;
+    bool IsOwned() const;
 
     void InitBlock(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
     void ChangeTexture(QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
 
+    void ChangeOwner(Player *newOwner);
+
     const QVector3D& GetLocation() const;
     QImage *getMainTexture();
 
-    void calculateTBN(QVector<VertexData> &data); //для карты нормалей
+    void CalculateTBN(QVector<VertexData> &data); //для карты нормалей
 
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
     void Rotate(const QQuaternion &r);
@@ -67,12 +70,12 @@ private:
     const float HEIGHT = 3.0f / 2.0f;
     const float DEPTH = 3.0f / 2.0f;
 
-
-    BlockType blockType;
-    bool isAvailable;
-    Player *currentBlockOwner = nullptr;
-
+    bool isAvailableToStep = false;
+    BlockType blockType = sand;
+    int levelOfDefense = 0;
     int moneyIncome;
+
+    Player *currentBlockOwner = nullptr;
 
 };
 

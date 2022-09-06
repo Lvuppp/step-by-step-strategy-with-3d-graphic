@@ -14,6 +14,8 @@
 #include "skybox.h"
 #include "unit.h"
 #include "block.h"
+#include "player.h"
+#include "building.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -31,6 +33,12 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+//    void FinishTurn(); // завершение хода
+
+public slots:
+    void FinishTurn();
+    void keyPress(QKeyEvent *event);
+
 protected:
 
     void initializeGL(); //вызывается один раз, при создании приложения
@@ -40,13 +48,13 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
-    void keyPressEvent(QKeyEvent *event);
 
     void initShaders();
-    void initBlock(float width, float height, float depth, QImage *diffuseMap = 0, QImage *normalMap = 0);
     void TakeStep(const int& indexOfBlock, const int& indexOfUnit);
+    void CreateBuilding(const int &blockPosition);
+    void CreateUnit(const int &blockPosition);
 
-    void ChangeBlockTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
+    void ChangeBlocksTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
     int SelectObject(int x, int y, QVector<WorldEngineBase *> &objs);
 
 private:
@@ -64,8 +72,9 @@ private:
 
     QVector2D MousePosition;
 
-    QVector<Unit*> Units;
-    QVector<Block*>  floor;
+    QVector<Unit *> units;
+    QVector<Block *>  floor;
+    QVector<Building *> buildings;
 
     QVector<WorldEngineBase *> WorldObjects, selectObjects, selectedBlocks;
     QVector<Group *> groups;
@@ -75,6 +84,7 @@ private:
 
     // мап убрал т.к перенёс эту логику в блоки
 
+    QVector<QVector<qsizetype>> mapMatrix;
     qsizetype square;
 
     /*
@@ -85,10 +95,13 @@ private:
       не откроется, пока все объекты не будут отрисованы)
 
     */
+    bool isUnitBoughtToCreate = false; // нажата ли кнопка для покупки юнита
+    bool isBuildingBoughtToCreate = false; // нажата ли кнопка для покупки юнита
 
 
     QVector<Player *> players;
 
-    Unit *selectedUnit = nullptr; // выбранный персонаж, требуется для запоминания текущего выбранного пперсонажа
+    Player *currentPlayer = nullptr;  // текущий игрок
+    Unit *selectedUnit = nullptr; // выбранный юнит, требуется для запоминания текущего выбранного юнита
 };
 #endif // WIDGET_H

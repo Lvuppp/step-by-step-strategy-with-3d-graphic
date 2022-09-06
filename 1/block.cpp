@@ -2,34 +2,16 @@
 
 #include <QDir>
 
-Block::Block(QImage *texture, Player *owner)
-    : mainTexture(*texture), blockType(sand), isAvailable(false), currentBlockOwner(owner)
+Block::Block(QImage *texture, const BlockType &blockType, Player *owner)
+    : mainTexture(*texture),isAvailableToStep(false), blockType(blockType), currentBlockOwner(owner)
 {
     InitBlock(texture);
 }
 
-Block::Block(QImage *texture, QImage *normalMap, Player *owner)
+Block::Block(QImage *texture, QImage *normalMap, const BlockType &blockType ,Player *owner)
+    : mainTexture(*texture), isAvailableToStep(false), blockType(blockType), currentBlockOwner(owner)
 {
     InitBlock(texture, normalMap);
-}
-
-//Block::Block(QImage &texture, Player *owner) :
-//    mainTexture(texture), blockType(sand), isAvailable(false), currentBlockOwner(owner)
-//{
-
-//}
-
-
-//Block::Block(const BlockType &type) : blockType(type), isAvailable(false)
-//{
-////    if (type == sand)
-////        ObjPath = ":/aloe_vera_plant/aloevera.obj";
-//}
-
-
-const QString &Block::GetObj() const
-{
-    //return ObjPath;
 }
 
 const Block::BlockType &Block::GetType() const
@@ -37,15 +19,24 @@ const Block::BlockType &Block::GetType() const
     return blockType;
 }
 
-
-void Block::ChangeAvailableStatus()
+Player *Block::GetOwner()
 {
-    isAvailable = !isAvailable;
+    return currentBlockOwner;
 }
 
-const bool &Block::IsAvailable() const
+void Block::ChangeAvailableToStepStatus()
 {
-    return isAvailable;
+    isAvailableToStep = !isAvailableToStep;
+}
+
+void Block::ChangeLevelOfDefense(const int &levelOfAttack)
+{
+    levelOfDefense = levelOfAttack;
+}
+
+bool Block::IsAvailableToStep(const int &levelOfAttack) const
+{
+    return (levelOfAttack >= levelOfDefense);
 }
 
 void Block::InitBlock(QImage *diffuseMap, QImage *normalMap)
@@ -116,7 +107,7 @@ void Block::InitBlock(QImage *diffuseMap, QImage *normalMap)
     mtl->setSpecularColor(QVector3D(1.0, 1.0, 1.0));
     mtl->setAmbienceColor(QVector3D(1.0, 1.0, 1.0));
 
-    calculateTBN(vertexes);
+    CalculateTBN(vertexes);
     object = new Object3D(vertexes, indexes, mtl);
 
 }
@@ -145,9 +136,13 @@ void Block::ChangeTexture(QImage *diffuseMap, QImage *normalMap)
     object->ChangeMaterial(mtl);
 }
 
+void Block::ChangeOwner(Player *newOwner)
+{
+    currentBlockOwner = newOwner;
+    mainTexture = currentBlockOwner->GetPlayerTexture();
+}
 
-
-void Block::calculateTBN(QVector<VertexData> &data)
+void Block::CalculateTBN(QVector<VertexData> &data)
 {
     for (qsizetype i = 0; i < data.size(); i += 3) {
 

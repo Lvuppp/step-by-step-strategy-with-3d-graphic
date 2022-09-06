@@ -1,4 +1,5 @@
-#include "widget.h"
+//#include "widget.h"
+#include "menu.h"
 
 #include <QApplication>
 
@@ -38,13 +39,16 @@ int main(int argc, char *argv[])
 
 //убираем зернистось текстуры (добавляем больше сэмплов в отрисовку):
 
-    QSurfaceFormat format;
-    format.setSamples(16);
-    format.setDepthBufferSize(24);
-    QSurfaceFormat::setDefaultFormat(format);
+//    QSurfaceFormat format;
+//    format.setSamples(16);
+//    format.setDepthBufferSize(24);
+//    QSurfaceFormat::setDefaultFormat(format);
 
-    Widget w;
-    w.show();
+    Menu m;
+    m.show();
+
+    //Widget w;
+    //w.show();
 
     return a.exec();
 }

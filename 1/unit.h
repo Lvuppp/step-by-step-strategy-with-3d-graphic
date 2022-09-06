@@ -15,7 +15,6 @@ class Unit : public WorldEngineBase
 {
 public:
 
-
     /*
         Думаю, это что-то вроде типа персонажей.
         В дальнейшем, в зависимости от него будет применяться
@@ -23,6 +22,7 @@ public:
 
         Разумеется, нужно переназвать
     */
+
     enum Type {
 
         type0 = 0,
@@ -30,31 +30,23 @@ public:
     };
 
     Unit();
-
     Unit(const Type &type, const int& position);
-
-    const QString &GetObj() const;
-    const Type &GetType() const;
-
-    QVector<qsizetype> AvailableSteps(const qsizetype& CurFloorPos, const qsizetype &FloorSquare);
 
     virtual ~Unit() {
 
-        for(auto object: objects)
-            delete object;
+        for (int i = 0; i < objects.size(); ++i) {
+            delete objects[i];
+        }
 
     }
 
+    void RestoreStamina();
+    QVector<qsizetype> AvailableSteps(const qsizetype &floorSquare,const QVector<QVector<qsizetype>> mapMatrix);
     void loadObjectFromFile(const QString &path);
-    void addObject(Object3D *object );
-    Object3D *getObject(quint32 index);
-
-    void calculateTBN(QVector<VertexData> &data); //для карты нормалей
-
-    const QVector3D& GetLocation() const;
-    const int& getBlockPosition() const;
+    void addObject(Object3D *object);
+    void CalculateTBN(QVector<VertexData> &data); //для карты нормалей
     void SetBlockPosition(const int& blockNumber);
-
+    void DicreaseStamina();
 
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
     void Rotate(const QQuaternion &r);
@@ -62,14 +54,28 @@ public:
     void Scale(const float &s);
     void SetGlobalTransform(const QMatrix4x4 &q);
 
+    const int &GetLevelOfAttack() const;
+    const int &GetLevelOfDefense() const;
+    const QVector3D& GetLocation() const;
+    const int &GetBlockPosition() const;
+    const QString &GetObj() const;
+    const Type &GetType() const;
+    const int &GetCost() const;
+    const int &GetStamina() const;
+    Object3D *GetObject(quint32 index);
+
 private:
 
-    QVector<qsizetype> CalculateForType0(const qsizetype& i, const qsizetype &s);
     QVector<Object3D *> objects;
     MaterialLibrary materialLibrary;
     QString ObjPath;
 
     int positionOnBlock;
-    Type UnitType;
+
+    int stamina = 0;
+    int cost;
+
+    int levelOfAttack;
+    int levelOfDefense;
 };
 #endif // UNIT_H

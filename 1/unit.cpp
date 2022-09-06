@@ -2,14 +2,21 @@
 
 #include <QDir>
 
-Unit::Unit() : UnitType(type0)
+Unit::Unit()
 {
 }
 
-Unit::Unit(const Type &type,const int& position) :  positionOnBlock(position), UnitType(type)
+Unit::Unit(const Type &type,const int& position) :  positionOnBlock(position)
 {
-    if (type == type0)
+    if (type == type0){
         ObjPath = ":/aloe_vera_plant/aloevera.obj";
+        levelOfAttack = levelOfDefense = 1;
+    }
+}
+
+void Unit::RestoreStamina()
+{
+    stamina = 1;
 }
 
 const QString &Unit::GetObj() const
@@ -17,17 +24,32 @@ const QString &Unit::GetObj() const
     return ObjPath;
 }
 
-const Unit::Type &Unit::GetType() const
+const int &Unit::GetStamina() const
 {
-    return UnitType;
+    return stamina;
 }
 
-QVector<qsizetype> Unit::AvailableSteps(const qsizetype &CurFloorPos, const qsizetype &FloorSquare)
+QVector<qsizetype> Unit::AvailableSteps(const qsizetype &floorSquare,const QVector<QVector<qsizetype>> mapMatrix)
 {
-    if (UnitType == type0)
-        return CalculateForType0(CurFloorPos, FloorSquare);
+    QVector<qsizetype> availableSteps;
 
-    return QVector<qsizetype>();
+    qsizetype startRowIndex = this->positionOnBlock / floorSquare;
+    qsizetype startLineIndex = this->positionOnBlock % floorSquare;
+    // т.к у нас основная матрица "окружена" нулями, то мы прибавлем 1 чтобы получить истинное расположение персонажа
+
+    for (qsizetype i = startRowIndex; i < startRowIndex + 3; i++) {
+        for (qsizetype j = startLineIndex; j < startLineIndex + 3; j++) {
+
+            if(mapMatrix[i][j] == 0 || (i == startRowIndex + 1 && j == startLineIndex + 1)){
+                continue;
+            }
+
+            availableSteps.emplaceBack((i - 1) * floorSquare + j - 1);
+
+        }
+    }
+
+    return availableSteps;
 }
 
 void Unit::loadObjectFromFile(const QString &path)
@@ -121,7 +143,7 @@ void Unit::addObject(Object3D *object)
     objects.append(object);
 }
 
-Object3D *Unit::getObject(quint32 index)
+Object3D *Unit::GetObject(quint32 index)
 {
     if (index < objects.size())
         return objects[index];
@@ -129,7 +151,7 @@ Object3D *Unit::getObject(quint32 index)
         return nullptr;
 }
 
-void Unit::calculateTBN(QVector<VertexData> &data)
+void Unit::CalculateTBN(QVector<VertexData> &data)
 {
     for (qsizetype i = 0; i < data.size(); i += 3) {
 
@@ -174,7 +196,7 @@ const QVector3D &Unit::GetLocation() const
     return objects.last()->GetLocation();
 }
 
-const int &Unit::getBlockPosition() const
+const int &Unit::GetBlockPosition() const
 {
     return positionOnBlock;
 }
@@ -182,6 +204,11 @@ const int &Unit::getBlockPosition() const
 void Unit::SetBlockPosition(const int& blockNumber)
 {
     positionOnBlock = blockNumber;
+}
+
+void Unit::DicreaseStamina()
+{
+    --stamina;
 }
 
 void Unit::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
@@ -214,26 +241,14 @@ void Unit::SetGlobalTransform(const QMatrix4x4 &q)
         objects[i]->SetGlobalTransform(q);
 }
 
-QVector<qsizetype> Unit::CalculateForType0(const qsizetype &i, const qsizetype &s)
+const int &Unit::GetLevelOfAttack() const
 {
-
-    /*
-
-      Отсюда возвращаем индексы кубов, которые будут потом перерисованы.
-      Индексы зависят от последовательности добавления объектов в вектор
-      floor, поэтому если (когда) будете изменять формат карты не забудьте
-      и про эту функцию)
-
-      Оставлю один блок ниже для примера <3
-
-    */
-
-    QVector<qsizetype> steps;
-        steps.emplaceBack(i - 1);
-        steps.emplaceBack(i - s);
-        steps.emplaceBack(i - s - 1);
+    return levelOfAttack;
+}
 
 
-    return steps;
+const int &Unit::GetLevelOfDefense() const
+{
+    return levelOfDefense;
 }
 

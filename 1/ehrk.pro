@@ -10,11 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     block.cpp \
+    building.cpp \
     camera.cpp \
     group.cpp \
+    iplayer.cpp \
     main.cpp \
     material.cpp \
     materiallibrary.cpp \
+    menu.cpp \
     object3d.cpp \
     player.cpp \
     skybox.cpp \
@@ -23,10 +26,13 @@ SOURCES += \
 
 HEADERS += \
     block.h \
+    building.h \
     camera.h \
     group.h \
+    iplayer.h \
     material.h \
     materiallibrary.h \
+    menu.h \
     object3d.h \
     player.h \
     skybox.h \
@@ -45,3 +51,6 @@ RESOURCES += \
     models.qrc \
     shaders.qrc \
     textures.qrc
+
+FORMS += \
+    menu.ui
