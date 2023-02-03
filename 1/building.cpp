@@ -2,14 +2,13 @@
 
 #include <QDir>
 
-Building::Building() : BuildingType(type0)
+Building::Building()
 {
 }
 
-Building::Building(const Type &type,const int& position) :  positionOnBlock(position), BuildingType(type)
+Building::Building(const BuildingType &type, const int& position): buildingType(type), positionOnBlock(position)
 {
-    if (type == type0)
-        ObjPath = ":/burger/burger_merged.obj";
+
 }
 
 const QString &Building::GetObj() const
@@ -17,15 +16,6 @@ const QString &Building::GetObj() const
     return ObjPath;
 }
 
-const Building::Type &Building::GetType() const
-{
-    return BuildingType;
-}
-
-QVector<qsizetype> Building::GetProtectedBlocks(const qsizetype &CurFloorPos, const qsizetype &FloorSquare)
-{
-
-}
 
 void Building::loadObjectFromFile(const QString &path)
 {

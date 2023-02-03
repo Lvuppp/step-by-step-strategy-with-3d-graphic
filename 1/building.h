@@ -16,8 +16,14 @@ class Building : public WorldEngineBase
 {
 public:
 
+    enum BuildingType{
+        common,
+        rare,
+        epic
+    };
+
     Building();
-    Building(const int& position);
+    Building(const BuildingType &type, const int& position);
 
     virtual ~Building() {
 
@@ -26,6 +32,7 @@ public:
         }
 
     }
+
 
     QVector<qsizetype> GetProtectedBlocks(const qsizetype& CurFloorPos, const qsizetype &FloorSquare);
     void loadObjectFromFile(const QString &path);
@@ -52,6 +59,7 @@ protected:
     MaterialLibrary materialLibrary;
     QString ObjPath;
 
+    BuildingType buildingType;
     int positionOnBlock;
 
     int cost;

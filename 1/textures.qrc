@@ -1,14 +1,40 @@
 <RCC>
     <qresource prefix="/">
-        <file>skybox0.png</file>
-        <file>cl_ppl.jpg</file>
-        <file>_floor.jpg</file>
-        <file>pantone-very-peri-2022.jpg</file>
-        <file>ice_texture.jpg</file>
         <file>icons/Cards_Archers.png</file>
         <file>icons/Cards_Golem.png</file>
         <file>icons/Cards_Heal.png</file>
         <file>icons/Cards_Knight.png</file>
         <file>icons/Cards_Wizard.png</file>
+        <file>gameTextures/normalTexture.jpg</file>
+        <file>gameTextures/selectionTexture.jpg</file>
+        <file>gameTextures/texture1.jpg</file>
+        <file>gameTextures/texture2.jpg</file>
+        <file>gameTextures/texture3.jpg</file>
+        <file>gameTextures/texture4.jpg</file>
+        <file>gameTextures/texture5.jpg</file>
+        <file>menuTextures/gamePreview.jpg</file>
+        <file>gameTextures/skyboxTexture.png</file>
+        <file>menuTextures/developersButton.jpg</file>
+        <file>menuTextures/startGameButton.jpg</file>
+        <file>playersColors/texture1.purple.jpg</file>
+        <file>playersColors/texture1.red.jpg</file>
+        <file>playersColors/texture1.turquoise.jpg</file>
+        <file>playersColors/texture1.yellow.jpg</file>
+        <file>playersColors/texture2.purple.jpg</file>
+        <file>playersColors/texture2.red.jpg</file>
+        <file>playersColors/texture2.turquoise.jpg</file>
+        <file>playersColors/texture2.yellow.jpg</file>
+        <file>playersColors/texture3.purple.jpg</file>
+        <file>playersColors/texture3.red.jpg</file>
+        <file>playersColors/texture3.turquoise.jpg</file>
+        <file>playersColors/texture3.yellow.jpg</file>
+        <file>playersColors/texture4.purple.jpg</file>
+        <file>playersColors/texture4.red.jpg</file>
+        <file>playersColors/texture4.turquoise.jpg</file>
+        <file>playersColors/texture4.yellow.jpg</file>
+        <file>playersColors/texture5.purple.jpg</file>
+        <file>playersColors/texture5.red.jpg</file>
+        <file>playersColors/texture5.turquoise.jpg</file>
+        <file>playersColors/texture5.yellow.jpg</file>
     </qresource>
 </RCC>

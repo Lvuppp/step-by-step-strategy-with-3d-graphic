@@ -2,16 +2,71 @@
 
 #include <QDir>
 
-Block::Block(QImage *texture, const BlockType &blockType, Player *owner)
-    : mainTexture(*texture),isAvailableToStep(false), blockType(blockType), currentBlockOwner(owner)
+Block::Block(QImage *texture, const int &type, Player *owner)
+    : mainTexture(texture),isAvailableToStep(false), currentBlockOwner(owner)
 {
-    InitBlock(texture);
+    if(type == 0){
+        moneyIncome = 1;
+        blockType = Block::rock;
+    }
+
+    if(type == 1){
+        moneyIncome = 2;
+        blockType = Block::gravel;
+    }
+
+    if(type == 2){
+        moneyIncome = 3;
+        blockType = Block::sand;
+    }
+
+    if(type == 3){
+        moneyIncome = 4;
+        blockType = Block::ground;
+    }
+
+    if(type == 4){
+        moneyIncome = 5;
+        blockType = Block::grass;
+    }
+
+    InitBlock(texture,new QImage(":/gameTextures/normalTexture.jpg"));
+
+    if(currentBlockOwner != nullptr)
+        currentBlockOwner->IncreaseMoneyIncome(moneyIncome);
 }
 
-Block::Block(QImage *texture, QImage *normalMap, const BlockType &blockType ,Player *owner)
-    : mainTexture(*texture), isAvailableToStep(false), blockType(blockType), currentBlockOwner(owner)
+Block::Block(QImage *texture, QImage *normalMap, const int &type ,Player *owner)
+    : mainTexture(texture), isAvailableToStep(false), currentBlockOwner(owner)
 {
+    if(type == 0){
+        moneyIncome = 1;
+        blockType = Block::rock;
+    }
+
+    if(type == 1){
+        moneyIncome = 2;
+        blockType = Block::gravel;
+    }
+
+    if(type == 2){
+        moneyIncome = 3;
+        blockType = Block::sand;
+    }
+
+    if(type == 3){
+        moneyIncome = 4;
+        blockType = Block::ground;
+    }
+
+    if(type == 4){
+        moneyIncome = 5;
+        blockType = Block::grass;
+    }
     InitBlock(texture, normalMap);
+
+    if(currentBlockOwner != nullptr)
+        currentBlockOwner->IncreaseMoneyIncome(moneyIncome);
 }
 
 const Block::BlockType &Block::GetType() const
@@ -22,6 +77,11 @@ const Block::BlockType &Block::GetType() const
 Player *Block::GetOwner()
 {
     return currentBlockOwner;
+}
+
+int Block::GetIncome()
+{
+    return moneyIncome;
 }
 
 void Block::ChangeAvailableToStepStatus()
@@ -110,7 +170,7 @@ void Block::InitBlock(QImage *diffuseMap, QImage *normalMap)
     else
         mtl->setNormalMap(":/ice_texture.jpg");
 
-    mainTexture = *diffuseMap;
+    mainTexture = diffuseMap;
 
     mtl->setShinnes(96.0);
     mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
@@ -136,7 +196,7 @@ void Block::ChangeTexture(QImage *diffuseMap, QImage *normalMap)
     if (normalMap)
         mtl->setNormalMap(*normalMap);
     else
-        mtl->setNormalMap(":/ice_texture.jpg");
+        mtl->setNormalMap(":/gameTextures/normalTexture.jpg");
 
     mtl->setShinnes(96.0);
     mtl->setDiffuseColor(QVector3D(1.0, 1.0, 1.0));
@@ -148,8 +208,12 @@ void Block::ChangeTexture(QImage *diffuseMap, QImage *normalMap)
 
 void Block::ChangeOwner(Player *newOwner)
 {
+    if(currentBlockOwner != nullptr)
+        currentBlockOwner->DecreaseMoneyIncome(moneyIncome);
+
     currentBlockOwner = newOwner;
-    mainTexture = currentBlockOwner->GetPlayerTexture();
+    mainTexture = currentBlockOwner->GetPlayerColor(blockType);
+    currentBlockOwner->IncreaseMoneyIncome(moneyIncome);
 }
 
 void Block::CalculateTBN(QVector<VertexData> &data)
@@ -199,7 +263,7 @@ const QVector3D &Block::GetLocation() const
 
 QImage *Block::getMainTexture()
 {
-    return &mainTexture;
+    return mainTexture;
 }
 
 void Block::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)

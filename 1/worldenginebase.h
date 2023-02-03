@@ -1,6 +1,7 @@
 #ifndef WORLDENGINEBASE_H
 #define WORLDENGINEBASE_H
 
+
 class QQuaternion;
 class QVector3D;
 class QMatrix4x4;
@@ -9,7 +10,6 @@ class QOpenGLFunctions;
 
 
 class WorldEngineBase {
-
 public:
 
     virtual void Rotate(const QQuaternion &r) = 0;

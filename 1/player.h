@@ -8,19 +8,28 @@ class Player : public IPlayer
 {
 public:
     Player();
+    Player(QVector<QImage *> playerColor);
 
     ~Player(){
     };
 
     void AddUnit(Unit *unit) override;
-    void AddBuilding(Building *building) override;
-    QImage &GetPlayerTexture() override;
+    void AddBuilding(DefenseBuilding *building) override;
+    QImage *GetPlayerColor(int type) override;
     void RestoreUnitsStamina() override;
-    QVector<WorldEngineBase *> GetUnits() override;
+    QVector<WorldEngineBase* > GetUnits() override;
+    QVector<Unit* > GetPlayerUnits() override;
+    QVector<DefenseBuilding* > GetPlayerBuildings() override;
+    void IncreaseMoney() override;
+    void DecreaseMoney(int money)  override;
+    void IncreaseMoneyIncome(int increaseMoney) override;
+    void DecreaseMoneyIncome(int decreaseMoney) override;
+    int GetMoney() override;
+    int GetMoneyIncome() override;
 
 private:
-    int moneyPoints;
-    int moneyPointsIncome;
+    int money = 0;
+    int moneyIncome = 0;
 
     //если будет наука надо добавить два поля по аналогии с деньгами
 
@@ -29,8 +38,8 @@ private:
 
     QVector<WorldEngineBase *> selectedPlayerUnits;
     QVector<Unit *> playerUnits;
-    QVector<Building *> playerBuilding;
-    QImage playerTexture; // сделать либо выбор текстуры, либо просто на рандом
+    QVector<DefenseBuilding *> playerBuildings;
+    QVector<QImage *>playerColor ; // сделать либо выбор текстуры, либо просто на рандом
                                                 //(Каждая текстура это просто разный цвет)
 };
 

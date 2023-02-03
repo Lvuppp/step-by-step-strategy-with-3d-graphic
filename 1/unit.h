@@ -24,15 +24,15 @@ public:
     */
 
     enum UnitType {
-        knight = 0,
-        archer = 1,
-        cleric = 2,
-        mage = 3,
-        golem = 4
+        knight,
+        archer,
+        cleric,
+        mage,
+        golem
     };
 
     Unit();
-    Unit(const UnitType &type, const int& position);
+    Unit(const UnitType &type,QVector3D pos, const int& position);
 
     virtual ~Unit() {
 
@@ -75,7 +75,7 @@ private:
     int positionOnBlock;
 
     UnitType unitType;
-    int stamina = 0;
+    int stamina = 1;
     int cost;
 
     int levelOfAttack;

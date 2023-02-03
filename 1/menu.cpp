@@ -1,53 +1,74 @@
-#include "menu.h"
+﻿#include "menu.h"
 #include "ui_menu.h"
-
-//#define N 4
 
 Menu::Menu(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Menu)
 {
-
     ui->setupUi(this);
-    qApp->installEventFilter(this);
 
-    ChangeBackgroundColor(127, 145, 173);
+    ui->lobby->hide();
+    ui->game->hide();
 
-    items.reserve(30);
+    qDebug() << QString::number(ui->openGLWidget->width()) +  " " + QString::number(ui->openGLWidget->height());
 
-    w = new Widget(ui->openGLWidget);
-
-    w->resize(ui->openGLWidget->width(), ui->openGLWidget->height());
-
-    AddImage(ui->CharacterImages, ":/icons/Cards_Knight.png", 80);
-    AddImage(ui->CharacterImages, ":/icons/Cards_Archers.png", 80);
-    AddImage(ui->CharacterImages, ":/icons/Cards_Heal.png", 80);
-    AddImage(ui->CharacterImages, ":/icons/Cards_Wizard.png", 80);
-    AddImage(ui->CharacterImages, ":/icons/Cards_Golem.png", 80);
-
-    AddImage(ui->BuildingImages, ":/cl_ppl.jpg");
-
-    AddText(ui->BuildingText, "1", QVector3D{255, 255, 255});
-
-    connect(this, &Menu::TurnFinished, w, &Widget::FinishTurn);
-    connect(this, &Menu::KeyPress, w, &Widget::keyPress);
-
-    w->show();
 }
 
 Menu::~Menu()
 {
     delete ui;
-
-    delete w;
-
-    for (auto i : items)
-        delete i;
 }
+
+void Menu::on_startGameButton_clicked()
+{
+    ui->lobby->hide();
+    ui->game->show();
+
+    qApp->installEventFilter(this);
+
+
+    ChangeBackgroundColor(127, 145, 173);
+
+    items.reserve(30);
+
+    w = new Widget(players, ui->openGLWidget);
+
+    w->resize(ui->openGLWidget->width(), ui->openGLWidget->height());
+
+    AddText(ui->BuildingText, "f1 - create unit", QVector3D{255, 255, 255});
+    AddImage(ui->CharacterImages,":/icons/Cards_Knight.png");
+    AddImage(ui->CharacterImages,":/icons/Cards_Archers.png");
+    AddImage(ui->CharacterImages,":/icons/Cards_Heal.png");
+    AddImage(ui->CharacterImages,":/icons/Cards_Wizard.png");
+    AddImage(ui->CharacterImages,":/icons/Cards_Golem.png");
+
+    AddText(ui->BuildingText, "f2 - create building", QVector3D{255, 255, 255});
+
+    connect(this, &Menu::TurnFinished, w, &Widget::FinishTurn);
+    connect(this, &Menu::KeyPress, w, &Widget::keyPress);
+    connect(w, &Widget::ChangeGold, this, &Menu::change_gold_label);
+
+    w->show();
+
+}
+
+
+void Menu::on_addPlayersButton_clicked()
+{
+    if(players.size() == 4){
+        ui->playerCount->setText("Total players amount: " + QString::number(players.size()) + "\n Max amount of player");
+        return;
+    }
+
+    players.append(new Player(playersTextures[players.size()]));
+
+    ui->playerCount->setText("Total players amount: " + QString::number(players.size()));
+}
+
 
 void Menu::on_openGLWidget_aboutToResize()
 {
-    w->resize(ui->openGLWidget->width(), ui->openGLWidget->height());
+    //   w->resize(ui->openGLWidget->width(), ui->openGLWidget->height());
 }
 
 void Menu::ChangeBackgroundColor(const int &r, const int &g, const int &b)
@@ -114,8 +135,62 @@ void Menu::keyPressEvent(QKeyEvent *event)
     emit KeyPress(event);
 }
 
-void Menu::on_pushButton_clicked()
+
+void Menu::on_createGameButton_clicked()
+{
+    ui->menu->hide();
+    ui->lobby->show();
+
+    QVector<QImage*> tmp;
+
+    tmp.append(new QImage(":/playersColors/texture1.purple.jpg"));
+    tmp.append(new QImage(":/playersColors/texture2.purple.jpg"));
+    tmp.append(new QImage(":/playersColors/texture3.purple.jpg"));
+    tmp.append(new QImage(":/playersColors/texture4.purple.jpg"));
+    tmp.append(new QImage(":/playersColors/texture5.purple.jpg"));
+    playersTextures.append(tmp);
+    qDebug() << playersTextures[0];
+    tmp.clear();
+
+    tmp.append(new QImage(":/playersColors/texture1.red.jpg"));
+    tmp.append(new QImage(":/playersColors/texture2.red.jpg"));
+    tmp.append(new QImage(":/playersColors/texture3.red.jpg"));
+    tmp.append(new QImage(":/playersColors/texture4.red.jpg"));
+    tmp.append(new QImage(":/playersColors/texture5.red.jpg"));
+    playersTextures.append(tmp);
+    tmp.clear();
+
+    tmp.append(new QImage(":/playersColors/texture1.turquoise.jpg"));
+    tmp.append(new QImage(":/playersColors/texture2.turquoise.jpg"));
+    tmp.append(new QImage(":/playersColors/texture3.turquoise.jpg"));
+    tmp.append(new QImage(":/playersColors/texture4.turquoise.jpg"));
+    tmp.append(new QImage(":/playersColors/texture5.turquoise.jpg"));
+    playersTextures.append(tmp);
+    tmp.clear();
+
+    tmp.append(new QImage(":/playersColors/texture1.yellow.jpg"));
+    tmp.append(new QImage(":/playersColors/texture2.yellow.jpg"));
+    tmp.append(new QImage(":/playersColors/texture3.yellow.jpg"));
+    tmp.append(new QImage(":/playersColors/texture4.yellow.jpg"));
+    tmp.append(new QImage(":/playersColors/texture5.yellow.jpg"));
+    playersTextures.append(tmp);
+    tmp.clear();
+
+    players.append(new Player(playersTextures[players.size()]));
+    players.append(new Player(playersTextures[players.size()]));
+    ui->playerCount->setText("Total players amount: " + QString::number(players.size()));
+
+}
+
+void Menu::change_gold_label(int money, int income)
+{
+    ui->gold->setText("Money: " + QString::number(money) + "(+" + QString::number(income) + ")");
+}
+
+
+void Menu::on_nextTurn_clicked()
 {
     emit TurnFinished();
 }
+
 

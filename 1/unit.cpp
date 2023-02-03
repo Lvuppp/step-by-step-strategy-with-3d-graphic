@@ -6,11 +6,15 @@ Unit::Unit()
 {
 }
 
-Unit::Unit(const UnitType &type,const int& position) :  positionOnBlock(position)
+Unit::Unit(const UnitType &type,QVector3D pos,const int& position) :  positionOnBlock(position)
 {
     if (type == knight){
         ObjPath = ":/aloe_vera_plant/aloevera.obj";
         levelOfAttack = levelOfDefense = 1;
+        this->loadObjectFromFile(this->GetObj());
+
+        this->Translate(QVector3D(pos.x(), -6.0f, pos.z()));
+        this->Scale(12.0f);
     }
 }
 
@@ -40,7 +44,7 @@ QVector<qsizetype> Unit::AvailableSteps(const qsizetype &floorSquare,const QVect
     for (qsizetype i = startRowIndex; i < startRowIndex + 3; i++) {
         for (qsizetype j = startLineIndex; j < startLineIndex + 3; j++) {
 
-            if(mapMatrix[i][j] == 0 || (i == startRowIndex + 1 && j == startLineIndex + 1)){
+            if((i == startRowIndex + 1 && j == startLineIndex + 1) || mapMatrix[i][j] == -1){
                 continue;
             }
 

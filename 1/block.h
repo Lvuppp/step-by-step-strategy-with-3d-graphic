@@ -19,16 +19,15 @@ public:
     // класс описывает блоки по которым передвигаются персонажи
 
     enum BlockType {
-
-        rock = 0,
-        gravel = 1,
-        sand = 2,
-        ground = 3,
-        grass = 4
+        rock,
+        gravel,
+        sand,
+        ground,
+        grass
     };
 
-    Block(QImage *texture, const BlockType &blockType, Player *owner = nullptr);
-    Block(QImage *texture, QImage *diffuseMap, const BlockType &blockType, Player *owner = nullptr);
+    Block(QImage *texture, const int &type, Player *owner = nullptr);
+    Block(QImage *texture, QImage *diffuseMap, const int &type, Player *owner = nullptr);
 
 
     virtual ~Block() {
@@ -38,6 +37,7 @@ public:
     const QString &GetObj() const;
     const BlockType &GetType() const;
     Player *GetOwner();
+    int GetIncome();
 
     void ChangeAvailableToStepStatus();
     void ChangeLevelOfDefense(const int &levelOfAttack);
@@ -66,7 +66,7 @@ private:
 
     Object3D * object;
     MaterialLibrary materialLibrary;
-    QImage mainTexture;
+    QImage *mainTexture;
 
     const float WIDTH = 3.0f / 2.0f;
     const float HEIGHT = 3.0f / 2.0f;

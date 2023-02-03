@@ -6,71 +6,205 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1193</width>
-    <height>779</height>
+    <width>1024</width>
+    <height>720</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QOpenGLWidget" name="openGLWidget">
+  <widget class="QFrame" name="lobby">
    <property name="geometry">
     <rect>
-     <x>11</x>
-     <y>11</y>
-     <width>1171</width>
-     <height>681</height>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>720</height>
     </rect>
    </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QPushButton" name="addPlayersButton">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>110</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add Player</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="startGameButton">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>110</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Game</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="playerCount">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>150</y>
+      <width>131</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QFrame" name="game">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>700</y>
-     <width>1171</width>
-     <height>71</height>
+     <x>-11</x>
+     <y>-7</y>
+     <width>1024</width>
+     <height>720</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="CharacterImages"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="CharacterText"/>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QHBoxLayout" name="BuildingImages"/>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="BuildingText"/>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton">
-      <property name="maximumSize">
-       <size>
-        <width>250</width>
-        <height>100</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">font: 24pt &quot;MV Boli&quot;;</string>
-      </property>
-      <property name="text">
-       <string>Следующий ход</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>19</x>
+      <y>709</y>
+      <width>1171</width>
+      <height>76</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="CharacterText"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="CharacterImages"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QHBoxLayout" name="BuildingImages"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="BuildingText"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QOpenGLWidget" name="openGLWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1920</width>
+      <height>1080</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="gold">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>10</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 24pt &quot;Leelawadee UI&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Gold: </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="nextTurn">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>640</y>
+      <width>250</width>
+      <height>74</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>250</width>
+      <height>100</height>
+     </size>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 24pt &quot;MV Boli&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Следующий ход</string>
+    </property>
+   </widget>
   </widget>
+  <widget class="QFrame" name="menu">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>720</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QPushButton" name="createGameButton">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>320</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
+    </property>
+    <property name="text">
+     <string>Create game</string>
+    </property>
+   </widget>
+  </widget>
+  <zorder>lobby</zorder>
+  <zorder>menu</zorder>
+  <zorder>game</zorder>
  </widget>
  <resources/>
  <connections/>

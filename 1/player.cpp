@@ -2,7 +2,12 @@
 
 Player::Player()
 {
-    playerTexture = QImage(":/cl_ppl.jpg");
+
+}
+
+Player::Player(QVector<QImage *>playerColor) :playerColor(playerColor)
+{
+
 }
 
 void Player::AddUnit(Unit *unit)
@@ -11,18 +16,58 @@ void Player::AddUnit(Unit *unit)
     selectedPlayerUnits.append(playerUnits.last());
 }
 
-void Player::AddBuilding(Building *building)
+void Player::AddBuilding(DefenseBuilding *building)
 {
-    playerBuilding.append(building);
+    playerBuildings.append(building);
 }
 
-QImage &Player::GetPlayerTexture()
+QImage *Player::GetPlayerColor(int type)
 {
-    return playerTexture;
+    return playerColor[type];
 }
 
 QVector<WorldEngineBase *> Player::GetUnits(){
     return selectedPlayerUnits;
+}
+
+QVector<Unit *> Player::GetPlayerUnits()
+{
+    return playerUnits;
+}
+
+QVector<DefenseBuilding *> Player::GetPlayerBuildings()
+{
+    return playerBuildings;
+}
+
+void Player::IncreaseMoney()
+{
+    money += moneyIncome;
+}
+
+void Player::DecreaseMoney(int decreaseMoney)
+{
+     money -= decreaseMoney;
+}
+
+void Player::IncreaseMoneyIncome(int increaseMoney)
+{
+    moneyIncome += increaseMoney;
+}
+
+void Player::DecreaseMoneyIncome(int decreaseMoney)
+{
+    moneyIncome -= decreaseMoney;
+}
+
+int Player::GetMoney()
+{
+    return money;
+}
+
+int Player::GetMoneyIncome()
+{
+    return moneyIncome;
 }
 
 void Player::RestoreUnitsStamina()

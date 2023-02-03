@@ -8,5 +8,10 @@
         <file>burger/burger_merged.fbx</file>
         <file>burger/burger_merged.mtl</file>
         <file>burger/burger_merged.obj</file>
+        <file>testModels/model.fbx</file>
+        <file>testModels/model.mtl</file>
+        <file>testModels/model.obj</file>
+        <file>buildingTextures/ArcherTower.mtl</file>
+        <file>buildingTextures/ArcherTower.obj</file>
     </qresource>
 </RCC>

@@ -6,7 +6,10 @@
 class DefenseBuilding : public Building
 {
 public:
-    DefenseBuilding(const int& levelOfBuilding, const int& positionOnBlock);
+
+    DefenseBuilding(const BuildingType &type,QVector3D pos,const int& position);
+
+    QVector<qsizetype> GetProtectedBlocks(const qsizetype &floorSquare, const QVector<QVector<qsizetype>> mapMatrix);
 
 private:
     int levelOfDefense;

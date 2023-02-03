@@ -8,6 +8,8 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
+#include <QRandomGenerator>
+#include <QTimer>
 
 #include "group.h"
 #include "camera.h"
@@ -16,6 +18,8 @@
 #include "block.h"
 #include "player.h"
 #include "building.h"
+#include "extractionbuilding.h"
+#include "defensebuilding.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -30,15 +34,15 @@ class Widget : public QOpenGLWidget
     Q_OBJECT
 
 public:
-    Widget(QWidget *parent = nullptr);
+    Widget(QVector<Player *> players, QWidget *parent = nullptr);
     ~Widget();
-
+signals:
+    void ChangeGold(int, int);
 
 public slots:
     void FinishTurn(); // окончание хода
     void keyPress(QKeyEvent *event);
 protected:
-
 
     void initializeGL(); //вызывается один раз, при создании приложения
     void resizeGL(int w, int h); //вызывается при масштабировании окна
@@ -48,16 +52,17 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
+
     void initShaders();
     void TakeStep(const int& indexOfBlock, const int& indexOfUnit);
     void CreateBuilding(const int &blockPosition);
     void CreateUnit(const int &blockPosition);
+    void NextTurn();
 
     void ChangeBlocksTexture(QVector<qsizetype> blocks, QImage *texture = nullptr);
     int SelectObject(int x, int y, QVector<WorldEngineBase *> &objs);
 
 private:
-
     QVector3D screenCoordsToWorldCoords(const QVector2D &mousePos);
 
     QMatrix4x4 ProjectionMatrix,
@@ -69,21 +74,19 @@ private:
                            SkyBoxShaderProgram,
                             SelectShaderProgram;
 
-    QVector2D MousePosition;
-
     QVector<Unit *> units;
     QVector<Block *>  floor;
     QVector<Building *> buildings;
 
-    QVector<WorldEngineBase *> WorldObjects, selectObjects, selectedBlocks;
+    QVector<WorldEngineBase *> worldObjects, selectObjects, selectedBlocks;
     QVector<Group *> groups;
 
     Camera* camera;
     SkyBox* skybox;
+    QTimer* gameTimer;
 
-    // мап убрал т.к перенёс эту логику в блоки
-
-    QVector<QVector<qsizetype>> mapMatrix;
+    QVector<QVector<qsizetype>> mapMatrix; // МОЖНО СОВМЕСТИТЬ С БЛОКОМ, А ТАКЖЕ ИЗМЕНИТЬ СПАВН КАРТЫ,
+    // СДЕЛАТЬ СВЯЗНЫЙ ГРАФ КОТОРЫЙ БУДЕМ СОЗДАВАТЬ
     qsizetype square;
 
     /*
@@ -99,6 +102,7 @@ private:
 
 
     QVector<Player *> players;
+    qsizetype currentPlayerIndex = 0;
 
     Player *currentPlayer = nullptr;  // текущий игрок
     Unit *selectedUnit = nullptr; // выбранный юнит, требуется для запоминания текущего выбранного юнита

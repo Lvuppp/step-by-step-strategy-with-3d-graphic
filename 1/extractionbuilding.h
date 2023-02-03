@@ -6,7 +6,7 @@
 class ExtractionBuilding : public Building
 {
 public:
-    ExtractionBuilding(const int &levelOfBuilding, const int &positionOnBlock);
+    ExtractionBuilding(const BuildingType &type,QVector3D pos,const int& position);
 
 private:
     int income;

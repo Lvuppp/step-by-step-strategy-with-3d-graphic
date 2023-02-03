@@ -1,9 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>assets/texture/0001.png</file>
-        <file>assets/texture/0002.png</file>
-        <file>assets/texture/0003.png</file>
-        <file>assets/texture/0005.png</file>
-        <file>assets/texture/0004.png</file>
-    </qresource>
-</RCC>

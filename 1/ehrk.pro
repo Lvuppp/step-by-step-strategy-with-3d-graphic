@@ -58,3 +58,5 @@ RESOURCES += \
 
 FORMS += \
     menu.ui
+
+DISTFILES +=
